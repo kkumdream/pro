@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>검정고시 문제풀이 (단일 파일)</title>
+<style>
+  :root { --bg:#fff; --fg:#111; --muted:#6b7280; --primary:#2563eb; --green:#16a34a; --red:#dc2626; --border:#e5e7eb; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif; background: var(--bg); color: var(--fg); }
+  .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  header { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; margin-bottom: 12px; }
+  h1 { font-size: 20px; margin: 0; }
+  .controls { display:flex; flex-wrap:wrap; gap:8px; }
+  button, select, input[type="text"], textarea { border:1px solid var(--border); border-radius:10px; padding:10px 12px; background:#fff; }
+  button { cursor:pointer; }
+  button.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  button.ghost { background: #f8fafc; }
+  .row { display:flex; gap: 10px; flex-wrap: wrap; align-items:center; }
+  .card { border:1px solid var(--border); border-radius: 16px; padding: 16px; background: #fff; }
+  .badge { display:inline-block; border:1px solid var(--border); padding:4px 8px; border-radius:999px; font-size:12px; color:#374151; }
+  .muted { color: var(--muted); }
+  .choice { border:1px solid var(--border); border-radius:12px; padding:10px; margin-top:8px; display:flex; align-items:center; gap:8px; }
+  .choice.selected { outline: 2px solid rgba(37,99,235,.25); }
+  .choice.correct { border-color: var(--green); }
+  .choice.wrong { border-color: var(--red); }
+  .numgrid { display:grid; grid-template-columns: repeat(auto-fill, minmax(38px,1fr)); gap:8px; }
+  .numgrid button { height:38px; display:flex; align-items:center; justify-content:center; border-radius: 10px; }
+  .pill { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); padding:4px 8px; border-radius:999px; }
+  .progress { height:8px; background:#f1f5f9; border-radius:999px; overflow:hidden; }
+  .bar { height:100%; width:0%; background: var(--green); }
+  .hidden { display:none; }
+  pre { background:#f8fafc; padding: 10px; border-radius: 10px; overflow:auto; border:1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="row">
+      <h1>검정고시 문제풀이</h1>
+      <span class="badge">로컬 저장</span>
+    </div>
+    <div class="controls">
+      <button id="btnImport">불러오기(JSON)</button>
+      <button id="btnExportAll" class="ghost">문제 백업</button>
+      <button id="btnExportWrong" class="ghost">오답노트 내보내기</button>
+      <button id="btnReset" class="ghost">초기화</button>
+    </div>
+  </header>
+
+  <section class="card">
+    <div class="row" style="justify-content: space-between;">
+      <div class="row">
+        <label class="pill">과목
+          <select id="filterSubject"></select>
+        </label>
+        <label class="pill">연도
+          <select id="filterYear"></select>
+        </label>
+        <label class="pill">회차
+          <select id="filterRound"></select>
+        </label>
+        <label class="pill">검색
+          <input type="text" id="search" placeholder="문항/해설/태그" />
+        </label>
+        <label class="pill"><input type="checkbox" id="onlyWrong"/> 오답만</label>
+      </div>
+      <div style="text-align:right; min-width:220px;">
+        <div class="muted" style="font-size:12px">정답 <span id="correctCount">0</span> / <span id="totalCount">0</span> (채점 <span id="checkedCount">0</span>)</div>
+        <div class="progress"><div class="bar" id="progressBar"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <div id="noItems" class="card hidden muted" style="text-align:center; margin-top:12px;">조건에 맞는 문제가 없습니다. 필터를 바꾸거나 JSON을 불러오세요.</div>
+
+  <section class="row" id="mainRow" style="margin-top:12px;">
+    <div class="card" style="flex:1 1 580px; min-width: 320px;">
+      <div class="row" style="justify-content:space-between; margin-bottom:12px;">
+        <div class="row">
+          <span class="badge" id="badgeSubject">과목</span>
+          <span id="badgeMeta" class="muted">-</span>
+        </div>
+        <div class="muted" id="idxMeta">-</div>
+      </div>
+      <div id="stem" style="white-space:pre-wrap; margin-bottom:8px;"></div>
+      <div id="choices"></div>
+      <div id="tags" class="muted" style="margin-top:8px; font-size:13px;"></div>
+      <div class="row" style="justify-content:space-between; margin-top:12px;">
+        <div class="row">
+          <button id="btnPrev" class="ghost">이전</button>
+          <button id="btnNext" class="ghost">다음</button>
+        </div>
+        <div class="row">
+          <button id="btnCheck" class="primary">정답 확인</button>
+          <button id="btnToggleExp" class="ghost">해설 보기</button>
+        </div>
+      </div>
+    </div>
+    <aside class="card" style="flex:0 0 320px; position:sticky; top:12px; height:fit-content;">
+      <h3 style="margin:0 0 8px 0;">결과 & 해설</h3>
+      <div id="expWrap" class="hidden">
+        <div class="muted" style="font-size:13px; margin-bottom:6px;">해설</div>
+        <div id="explanation" style="white-space:pre-wrap;"></div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="card" style="margin-top:12px;">
+    <div class="row" style="justify-content:space-between; margin-bottom:8px;">
+      <strong>문항 이동</strong>
+      <div class="muted" style="font-size:13px;">초록=정답, 빨강=오답, 파랑=선택</div>
+    </div>
+    <div id="numGrid" class="numgrid"></div>
+  </section>
+
+  <footer class="muted" style="text-align:center; font-size:12px; margin-top:12px;">
+    © <span id="year"></span> 검정고시 문제풀이 · 브라우저 로컬 저장 기반 · JSON 가져오기/내보내기 지원
+  </footer>
+</div>
+
+<input id="fileInput" type="file" accept="application/json" class="hidden" />
+
+<script>
+const LS_Q = "ged_questions_v1";
+const LS_P = "ged_progress_v1";
+
+// 샘플 문항
+const SAMPLE = [
+  { id:"K2024-1-1", subject:"국어", year:2024, round:1, number:1,
+    stem:"다음 글을 읽고 중심 생각으로 가장 적절한 것을 고르시오.",
+    choices:["자연은 인간에게 두려움의 대상이다.","자연과 조화롭게 사는 태도가 필요하다.","문명은 자연을 극복해야 한다.","자연은 인간의 통제를 벗어났다."],
+    answerIndex:1,
+    explanation:"글 전체가 '자연과의 조화'를 강조하고 있으므로 2번이 적절합니다.",
+    tags:["주제 파악","독해"]
+  },
+  { id:"M2024-1-12", subject:"수학", year:2024, round:1, number:12,
+    stem:"다음 수식의 값을 구하시오: 3x - 2 = 10 일 때 x의 값은?",
+    choices:["2","3","4","5"],
+    answerIndex:2,
+    explanation:"3x - 2 = 10 → 3x = 12 → x = 4, 따라서 3번째 보기가 정답입니다.",
+    tags:["일차방정식"]
+  },
+  { id:"S2023-2-7", subject:"사회", year:2023, round:2, number:7,
+    stem:"다음 중 민주 정치의 기본 원리로 옳지 않은 것은?",
+    choices:["국민 주권","권력 분립","법치주의","세습 군주제"],
+    answerIndex:3,
+    explanation:"세습 군주제는 민주주의의 기본 원리에 부합하지 않습니다.",
+    tags:["정치","핵심개념"]
+  }
+];
+
+// 상태
+let questions = (()=>{
+  try { const raw = localStorage.getItem(LS_Q); if(raw) return JSON.parse(raw);} catch(e){}
+  return SAMPLE;
+})();
+
+let progress = (()=>{
+  try { const raw = localStorage.getItem(LS_P); if(raw) return JSON.parse(raw);} catch(e){}
+  return { selected:{}, checked:{}, correct:{}, showExp:{} };
+})();
+
+function saveAll(){
+  localStorage.setItem(LS_Q, JSON.stringify(questions));
+  localStorage.setItem(LS_P, JSON.stringify(progress));
+}
+
+const $ = (sel)=>document.querySelector(sel);
+const $$ = (sel)=>Array.from(document.querySelectorAll(sel));
+
+const filterSubject = $("#filterSubject");
+const filterYear = $("#filterYear");
+const filterRound = $("#filterRound");
+const search = $("#search");
+const onlyWrong = $("#onlyWrong");
+
+const stem = $("#stem");
+const choicesWrap = $("#choices");
+const tags = $("#tags");
+const badgeSubject = $("#badgeSubject");
+const badgeMeta = $("#badgeMeta");
+const idxMeta = $("#idxMeta");
+const explanation = $("#explanation");
+const expWrap = $("#expWrap");
+const progressBar = $("#progressBar");
+const correctCountEl = $("#correctCount");
+const totalCountEl = $("#totalCount");
+const checkedCountEl = $("#checkedCount");
+const numGrid = $("#numGrid");
+const noItems = $("#noItems");
+
+let filtered = [];
+let idx = 0;
+
+function unique(xs){ return Array.from(new Set(xs)); }
+function applyFilters(){
+  const s = filterSubject.value;
+  const y = filterYear.value;
+  const r = filterRound.value;
+  const q = search.value.trim().toLowerCase();
+  const wrongIds = new Set(Object.keys(progress.correct).filter(id=>progress.checked[id] && !progress.correct[id]));
+
+  filtered = questions.filter(qi =>
+    (s==="전체" || qi.subject===s) &&
+    (y==="전체" || String(qi.year)===y) &&
+    (r==="전체" || String(qi.round)===r) &&
+    (q ? (qi.stem + " " + qi.choices.join(" ") + " " + qi.explanation + " " + (qi.tags||[]).join(" ")).toLowerCase().includes(q) : true) &&
+    (!onlyWrong.checked || wrongIds.has(qi.id))
+  ).sort((a,b)=>a.number-b.number);
+
+  if(idx>=filtered.length) idx=0;
+  renderMeta();
+  renderQuestion();
+  renderNumGrid();
+}
+
+function renderMeta(){
+  const subs = ["전체"].concat(unique(questions.map(q=>q.subject)));
+  const years = ["전체"].concat(unique(questions.map(q=>String(q.year))));
+  const rounds = ["전체"].concat(unique(questions.map(q=>String(q.round))));
+
+  function drawSelect(el, list){
+    const cur = el.value;
+    el.innerHTML = list.map(v=>`<option>${v}</option>`).join("");
+    if(list.includes(cur)) el.value = cur;
+  }
+  drawSelect(filterSubject, subs);
+  drawSelect(filterYear, years);
+  drawSelect(filterRound, rounds);
+
+  totalCountEl.textContent = filtered.length;
+  const checked = filtered.filter(q=>progress.checked[q.id]).length;
+  const correct = filtered.filter(q=>progress.correct[q.id]).length;
+  checkedCountEl.textContent = checked;
+  correctCountEl.textContent = correct;
+  progressBar.style.width = (filtered.length? Math.round(correct/filtered.length*100):0) + "%";
+
+  noItems.classList.toggle("hidden", filtered.length>0);
+  $("#mainRow").classList.toggle("hidden", filtered.length===0);
+}
+
+function renderQuestion(){
+  if(filtered.length===0){ return; }
+  const q = filtered[idx];
+  badgeSubject.textContent = q.subject;
+  badgeMeta.textContent = `${q.year}년 ${q.round}회 · 문항 ${q.number}`;
+  idxMeta.textContent = `${idx+1} / ${filtered.length}`;
+  stem.textContent = q.stem;
+  choicesWrap.innerHTML = "";
+
+  q.choices.forEach((c,i)=>{
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "choice";
+    btn.innerHTML = `<div class="badge">${i+1}</div><div style="flex:1; text-align:left;">${c}</div>`;
+    if(progress.selected[q.id]===i && !progress.checked[q.id]) btn.classList.add("selected");
+    if(progress.checked[q.id]){
+      if(i===q.answerIndex) btn.classList.add("correct");
+      if(progress.selected[q.id]===i && i!==q.answerIndex) btn.classList.add("wrong");
+    }
+    btn.onclick = ()=>{
+      if(progress.checked[q.id]) return;
+      progress.selected[q.id] = i;
+      saveAll();
+      applyFilters();
+    };
+    choicesWrap.appendChild(btn);
+  });
+
+  tags.textContent = (q.tags||[]).length? "#"+(q.tags||[]).join(" #") : "";
+  const show = !!progress.showExp[q.id];
+  expWrap.classList.toggle("hidden", !(progress.checked[q.id] && show));
+  explanation.textContent = q.explanation;
+}
+
+function renderNumGrid(){
+  numGrid.innerHTML = "";
+  filtered.forEach((q,i)=>{
+    const b = document.createElement("button");
+    b.textContent = q.number;
+    if(progress.checked[q.id]){
+      b.style.borderColor = progress.correct[q.id] ? "var(--green)" : "var(--red)";
+    } else if(progress.selected[q.id]!=null){
+      b.style.borderColor = "var(--primary)";
+    }
+    if(i===idx){ b.style.outline = "2px solid rgba(37,99,235,.25)"; }
+    b.onclick = ()=>{ idx = i; renderQuestion(); renderNumGrid(); };
+    numGrid.appendChild(b);
+  });
+}
+
+function checkCurrent(){
+  const q = filtered[idx];
+  const sel = progress.selected[q.id];
+  if(sel==null) return alert("보기를 선택하세요.");
+  const ok = sel===q.answerIndex;
+  progress.checked[q.id] = true;
+  progress.correct[q.id] = ok;
+  progress.showExp[q.id] = true;
+  saveAll(); applyFilters();
+}
+
+function toggleExp(){
+  const q = filtered[idx];
+  progress.showExp[q.id] = !progress.showExp[q.id];
+  saveAll(); applyFilters();
+}
+
+function next(){ if(idx < filtered.length-1){ idx++; renderQuestion(); renderNumGrid(); } }
+function prev(){ if(idx > 0){ idx--; renderQuestion(); renderNumGrid(); } }
+
+// Import/Export
+function download(filename, content){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([content],{type:"application/json;charset=utf-8"}));
+  a.download = filename; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+}
+
+function exportAll(){ download(`문제백업_${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(questions,null,2)); }
+function exportWrong(){
+  const wrong = questions.filter(q=>progress.checked[q.id] && !progress.correct[q.id]);
+  if(!wrong.length) alert("오답이 없습니다.");
+  download(`오답노트_${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(wrong,null,2));
+}
+
+function resetAll(){
+  if(!confirm("전체 진행 내역을 초기화할까요?")) return;
+  progress = { selected:{}, checked:{}, correct:{}, showExp:{} };
+  saveAll(); applyFilters();
+}
+
+function importJSONFromText(text){
+  const data = JSON.parse(text);
+  if(!Array.isArray(data)) throw new Error("배열(JSON 배열)이어야 합니다.");
+  data.forEach((q,i)=>{
+    if(typeof q.id!=="string") throw new Error(`${i+1}번째 항목: id 누락`);
+    if(!Array.isArray(q.choices)) throw new Error(`${i+1}번째 항목: choices 배열 필요`);
+  });
+  questions = data;
+  progress = { selected:{}, checked:{}, correct:{}, showExp:{} };
+  saveAll(); applyFilters();
+}
+
+function importFromFile(file){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try {
+      importJSONFromText(String(reader.result));
+      alert("불러오기 완료!");
+    } catch(e){ alert("불러오기 실패: " + e.message); }
+  };
+  reader.readAsText(file, "utf-8");
+}
+
+// Wire up
+$("#btnCheck").onclick = checkCurrent;
+$("#btnToggleExp").onclick = toggleExp;
+$("#btnNext").onclick = next;
+$("#btnPrev").onclick = prev;
+$("#btnExportAll").onclick = exportAll;
+$("#btnExportWrong").onclick = exportWrong;
+$("#btnReset").onclick = resetAll;
+$("#btnImport").onclick = ()=>$("#fileInput").click();
+$("#fileInput").onchange = (e)=>{
+  const f = e.target.files && e.target.files[0];
+  if(f) importFromFile(f);
+};
+
+[filterSubject, filterYear, filterRound].forEach(el=>el.onchange = applyFilters);
+search.oninput = applyFilters;
+onlyWrong.onchange = applyFilters;
+
+document.getElementById("year").textContent = new Date().getFullYear();
+applyFilters();
+</script>
+</body>
+</html>
