@@ -1,24 +1,109 @@
 {
   "meta": {
-    "source": "데이터 업데이트 예정",
+    "source": "2025년도 제2회 고졸 검정고시 영어",
     "level": "고졸",
     "year": 2025,
     "round": "2차",
     "subject": "영어",
-    "count": 1
+    "count": 8
   },
   "questions": [
     {
       "number": 1,
-      "stem": "영어 과목 데이터는 곧 업데이트됩니다. (데모)",
+      "stem": "We  n eed  to  fi n d  a  bal a nc e  bet w een  wo r k  an d  fa m i l y  li fe .",
       "choices": [
-        "알겠습니다",
-        "기다릴게요",
-        "좋아요",
-        "확인"
+        "감정",
+        "균형",
+        "모험",
+        "학습"
       ],
       "answerIndex": 0,
-      "explanation": "정식 데이터가 올라오면 자동 교체됩니다."
+      "explanation": ""
+    },
+    {
+      "number": 2,
+      "stem": "Pl e a s e  th ro w  aw a y  th e  tras h  af t e r  th e  pi cn i c .",
+      "choices": [
+        "버리다",
+        "들여놓다",
+        "보관하다",
+        "판매하다"
+      ],
+      "answerIndex": 0,
+      "explanation": ""
+    },
+    {
+      "number": 3,
+      "stem": "I  st udi e d  har d ,  so  I  passed  th e  tes t .",
+      "choices": [
+        "게다가",
+        "그래서",
+        "반면에",
+        "사실상"
+      ],
+      "answerIndex": 0,
+      "explanation": ""
+    },
+    {
+      "number": 4,
+      "stem": "다음 중 밑줄 친 두 단어의 의미 관계와 다른  것은 ?  \nTh e  gi f t  ma d e  me  happy ,  bu t  I  be c a m e  sa d  wh e n  I  lo s t  it.",
+      "choices": [
+        "s l o w － f a s t",
+        "w i d e － n a r r o w",
+        "e q u a l －s a m e",
+        "e a s y －d i f f i c u l t"
+      ],
+      "answerIndex": 1,
+      "explanation": ""
+    },
+    {
+      "number": 5,
+      "stem": "다음 안내문에서 언급되지 않은  것은 ?",
+      "choices": [
+        "행사 날짜",
+        "행사 장소",
+        "활동 내용",
+        "참가 연령\n[6～8]다음 중 빈칸에 공통으로 들어갈 말로 가장 적절한 것을 고르시오."
+      ],
+      "answerIndex": 0,
+      "explanation": ""
+    },
+    {
+      "number": 6,
+      "stem": "◦ He  go e s  for  a   ev e r y  mo r n i n g  to  st ay  he al t h y.\n◦ She  wa n t s  to   he r  ow n  shop  som e day.",
+      "choices": [
+        "r u n",
+        "h a n d",
+        "w i l l",
+        "l o s e"
+      ],
+      "answerIndex": 1,
+      "explanation": ""
+    },
+    {
+      "number": 7,
+      "stem": "◦ He  to l d  he r  th e  rea s on   he  wa s  cry i n g .\n◦ Can  yo u  te l l  me   yo u  we r e  abs e nt ?",
+      "choices": [
+        "h o w",
+        "w h y",
+        "w h e r e",
+        "w h i c h"
+      ],
+      "answerIndex": 0,
+      "explanation": ""
+    },
+    {
+      "number": 8,
+      "stem": "◦ I’m  re a l ly  l ook i n g  forw a r d   goi n g  cam p i n g.\n◦ My  mo m  used   rea d  bo oks  to  me  wh e n  I  wa s  \nl i ttl e.",
+      "choices": [
+        "a s",
+        "t o",
+        "f o r",
+        "l i k e9.다음 대화에서 밑줄 친 표현의 의미로 가장 적절한 것은 ?\nA: I  ac ci dent al l y  br oke  th e  cl assroom  wi n d o w .\nB: O h ,  no!  Di d  you  tell  th e  te ac h e r?\nA: Y e s ,  I  to l d  her  wh a t  happened  and  apol og i z ed.\nB: G o o d .  Ho n e s t y  is  th e  be st  pol i cy .",
+        "정직이 최선의 방책이다 ."
+      ],
+      "answerIndex": 1,
+      "explanation": ""
     }
   ]
 }
