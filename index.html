@@ -30,6 +30,7 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
 .section{margin-top:12px}
 .explain{white-space:pre-wrap;margin-top:8px}
 .stickybottom{position:sticky;bottom:0;background:var(--panel);padding:12px;border-top:1px solid var(--border)}
+.fig img{max-width:100%;border:1px solid var(--border);border-radius:8px;margin-top:8px;cursor:zoom-in}
 </style>
 </head>
 <body>
@@ -75,6 +76,7 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
     <div class="list" id="resultList"></div>
   </section>
 
+  <!-- One-by-one -->
   <section class="card hidden" id="screenOne">
     <div class="topnav">
       <div>
@@ -87,6 +89,7 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
       </div>
     </div>
     <div id="stemOne" style="white-space:pre-wrap;margin-top:12px"></div>
+    <div id="figsOne" class="section fig"></div>
     <div id="choicesOne"></div>
     <div class="section">
       <div class="row">
@@ -98,6 +101,7 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
     <div class="section explain" id="explainOne"></div>
   </section>
 
+  <!-- Exam -->
   <section class="card hidden" id="screenExam">
     <div class="topnav">
       <div>
@@ -120,11 +124,11 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
     <div class="section hidden" id="examResult"></div>
   </section>
 
-  <footer class="muted" style="margin-top:12px">흑백 UI · 한 문제 / 시험 모드 · 틀린 번호 클릭시 해당 문항/해설 보기</footer>
+  <footer class="muted" style="margin-top:12px">흑백 UI · 그림 클릭 시 확대 · x², x³ 표기 적용</footer>
 </div>
 
 <script>
-let MODE="one"; // one | exam
+let MODE="one";
 const tabOne=document.getElementById('tabOne'), tabExam=document.getElementById('tabExam');
 function setActive(el){ [tabOne,tabExam].forEach(b=>b.classList.remove('active')); el.classList.add('active'); }
 function goHome(){ screenSelect.classList.remove('hidden'); screenOne.classList.add('hidden'); screenExam.classList.add('hidden'); }
@@ -132,11 +136,10 @@ tabOne.onclick=()=>{ MODE="one"; setActive(tabOne); goHome(); };
 tabExam.onclick=()=>{ MODE="exam"; setActive(tabExam); goHome(); };
 
 const screenSelect=document.getElementById('screenSelect'), screenOne=document.getElementById('screenOne'), screenExam=document.getElementById('screenExam');
-
 const selType=document.getElementById('selType'), selLevel=document.getElementById('selLevel'), selYear=document.getElementById('selYear'), selSubject=document.getElementById('selSubject');
 const btnSearch=document.getElementById('btnSearch'), resultList=document.getElementById('resultList'), searchInfo=document.getElementById('searchInfo');
 
-const metaOne=document.getElementById('metaOne'), idxOne=document.getElementById('idxOne'), stemOne=document.getElementById('stemOne'), choicesOne=document.getElementById('choicesOne');
+const metaOne=document.getElementById('metaOne'), idxOne=document.getElementById('idxOne'), stemOne=document.getElementById('stemOne'), figsOne=document.getElementById('figsOne'), choicesOne=document.getElementById('choicesOne');
 const prevOne=document.getElementById('prevOne'), nextOne=document.getElementById('nextOne'), judgeOne=document.getElementById('judgeOne'), explainOne=document.getElementById('explainOne');
 const homeFromOne=document.getElementById('homeFromOne');
 
@@ -151,7 +154,7 @@ btnSearch.onclick=()=>{
   if(!MANIFEST){ alert('로딩 중입니다.'); return; }
   const T=selType.value, L=selLevel.value, Y=selYear.value, S=selSubject.value;
   const found = MANIFEST.sets.filter(s =>
-    (T==='전체'||s.type===T) && (L==='전체'||s.level===L) && (Y==='전체'||String(s.year)===Y) && (S==='전체'||s.subject.replace('(모의)','').replace('통합(모의)','통합')===S)
+    (T==='전체'||s.type===T) && (L==='전체'||s.level===L) && (Y==='전체'||String(s.year)===Y) && (S==='전체'||s.subject===S)
   );
   searchInfo.textContent=`총 ${found.length}개 세트`;
   resultList.innerHTML='';
@@ -174,18 +177,31 @@ function openSet(s){
   });
 }
 
-// One-by-one mode
+function renderFigures(container, q){
+  container.innerHTML='';
+  if(!q.figures) return;
+  q.figures.forEach(fig=>{
+    if(!fig.src) return;
+    const img=document.createElement('img');
+    img.src=fig.src; img.alt=fig.alt||'figure';
+    img.onclick=()=>window.open(fig.src,'_blank');
+    container.appendChild(img);
+    if(fig.caption){ const cap=document.createElement('div'); cap.className='muted'; cap.textContent=fig.caption; container.appendChild(cap); }
+  });
+}
+
+// One-by-one
 function openOne(){
   screenSelect.classList.add('hidden'); screenExam.classList.add('hidden'); screenOne.classList.remove('hidden');
   curIdx=0; userAnswers = new Array(CURRENT.questions.length).fill(null);
   renderOne();
 }
-
 function renderOne(){
   const q=CURRENT.questions[curIdx];
   metaOne.textContent = `${CURRENT.meta.year||''} ${CURRENT.meta.level||''} ${CURRENT.meta.subject||''}`.trim();
   idxOne.textContent=`문항 ${q.number} / 총 ${CURRENT.questions.length}`;
   stemOne.textContent=q.stem;
+  renderFigures(figsOne, q);
   choicesOne.innerHTML=''; judgeOne.textContent=''; explainOne.textContent='';
   q.choices.forEach((c,i)=>{
     const div=document.createElement('div'); div.className='choice';
@@ -204,11 +220,10 @@ function renderOne(){
   prevOne.disabled = (curIdx===0);
   nextOne.disabled = (curIdx===CURRENT.questions.length-1);
 }
-
 prevOne.onclick=()=>{ if(curIdx>0){ curIdx--; renderOne(); }};
 nextOne.onclick=()=>{ if(curIdx<CURRENT.questions.length-1){ curIdx++; renderOne(); }};
 
-// Exam mode (all at once)
+// Exam
 function openExam(){
   screenSelect.classList.add('hidden'); screenOne.classList.add('hidden'); screenExam.classList.remove('hidden');
   userAnswers = new Array(CURRENT.questions.length).fill(null);
@@ -216,7 +231,10 @@ function openExam(){
   examList.innerHTML=''; examResult.classList.add('hidden'); examResult.innerHTML='';
   CURRENT.questions.forEach((q,qi)=>{
     const wrap=document.createElement('div'); wrap.className='section'; wrap.id=`q${q.number}`;
-    wrap.innerHTML = `<div><strong>문항 ${q.number}</strong></div><div style="white-space:pre-wrap;margin-top:6px">${q.stem}</div>`;
+    wrap.innerHTML = `<div><strong>문항 ${q.number}</strong></div><div style="white-space:pre-wrap;margin-top:6px">${q.stem}</div><div class='section fig' id='figs_ex_${q.number}'></div>`;
+    // Figures
+    const figc=document.getElementById('figs_ex_'+q.number);
+    if(q.figures){ q.figures.forEach(fig=>{ if(!fig.src) return; const img=document.createElement('img'); img.src=fig.src; img.style.maxWidth='100%'; img.style.border='1px solid var(--border)'; img.style.borderRadius='8px'; img.style.marginTop='8px'; img.onclick=()=>window.open(fig.src,'_blank'); figc.appendChild(img); if(fig.caption){ const cap=document.createElement('div'); cap.className='muted'; cap.textContent=fig.caption; figc.appendChild(cap);} }); }
     const box=document.createElement('div'); box.style.marginTop='6px';
     q.choices.forEach((c,i)=>{
       const div=document.createElement('div'); div.className='choice';
@@ -228,7 +246,6 @@ function openExam(){
     wrap.appendChild(box); wrap.appendChild(exp); examList.appendChild(wrap);
   });
 }
-
 function gradeExam(){
   let correct=0; const wrongNums=[];
   CURRENT.questions.forEach((q,i)=>{ if(userAnswers[i]===q.answerIndex) correct++; else wrongNums.push(q.number); });
