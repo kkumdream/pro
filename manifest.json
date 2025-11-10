@@ -8,6 +8,14 @@
       "round": "2차",
       "subject": "수학",
       "path": "data/2025/2차/고졸/수학.json"
+    },
+    {
+      "type": "기출",
+      "level": "고졸",
+      "year": 2025,
+      "round": "2차",
+      "subject": "국어",
+      "path": "data/2025/2차/고졸/국어.json"
     }
   ]
 }
