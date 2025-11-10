@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html lang="ko"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>노원구 꿈드림 검정고시 문제 풀이</title>
 <style>
 :root { --bg:#0b0b0b; --panel:#121212; --fg:#f5f5f5; --muted:#a3a3a3; --border:#2a2a2a; --good:#22c55e; --bad:#ef4444 }
@@ -17,75 +20,197 @@ select,.btn{border:1px solid var(--border);background:var(--panel);color:var(--f
 .list a+a{margin-top:8px}
 .muted{color:var(--muted)}
 .choice{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--border);border-radius:12px;margin-top:8px;cursor:pointer;background:#0f0f0f}
-.choice.correct{border-color:var(--good)} .choice.wrong{border-color:var(--bad)}
 .gridNums{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:8px}
 .gridNums button{height:40px;border:1px solid var(--border);background:#0f0f0f;color:var(--fg);border-radius:10px}
 .topnav{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .hidden{display:none}
 hr{border:0;border-top:1px solid var(--border);margin:16px 0}
-</style></head>
+.badge{display:inline-block;border:1px solid var(--border);padding:2px 8px;border-radius:999px;font-size:12px;color:var(--muted)}
+</style>
+</head>
 <body>
 <div class="wrap">
   <header>
     <h1>노원구 꿈드림 검정고시 문제 풀이</h1>
     <div class="tabs">
-      <button class="tabbtn active" id="tabOne">1문제 풀기</button>
+      <button class="tabbtn active" id="tabOne">한 문제씩 풀기</button>
       <button class="tabbtn" id="tabExam">시험으로 풀기</button>
-      <button class="tabbtn" id="tabMock">모의고사 풀기</button>
     </div>
   </header>
+
   <section class="card" id="screenSelect">
     <div class="row">
       <label>항목
-        <select id="selLevel"><option value="전체">전체</option><option>초졸</option><option>중졸</option><option selected>고졸</option></select>
+        <select id="selType">
+          <option value="전체">전체</option><option>기출</option><option>모의고사</option>
+        </select>
       </label>
-      <label>회차
-        <select id="selRound"><option value="전체">전체</option><option selected>2차</option><option>모의1회</option></select>
+      <label>난이도
+        <select id="selLevel">
+          <option value="전체">전체</option><option>초졸</option><option>중졸</option><option selected>고졸</option>
+        </select>
       </label>
       <label>연도
-        <select id="selYear"><option value="전체">전체</option><option selected>2025</option></select>
+        <select id="selYear">
+          <option value="전체">전체</option><option selected>2025</option>
+        </select>
       </label>
       <label>과목
         <select id="selSubject">
           <option value="전체">전체</option>
           <option>국어</option><option>수학</option><option>영어</option><option>사회</option><option>과학</option>
           <option>한국사</option><option>도덕</option><option>기술·가정</option><option>음악</option><option>미술</option><option>체육</option>
-          <option>통합(모의)</option>
+          <option>통합</option>
         </select>
       </label>
       <button class="btn primary" id="btnSearch">검색</button>
     </div>
-    <div style="margin-top:10px" class="muted">※ /data에 JSON을 추가하면 바로 반영됩니다.</div>
+    <div style="margin-top:10px" class="muted">※ 탭을 누르면 항상 홈으로 돌아옵니다.</div>
     <hr/>
     <div class="muted" id="searchInfo">검색 전입니다.</div>
     <div class="list" id="resultList"></div>
   </section>
+
   <section class="card hidden" id="screenQuiz">
     <div class="topnav">
-      <div><strong id="qMeta"></strong><div class="muted" id="qIndex"></div></div>
-      <div class="row"><button class="btn" id="btnBack">뒤로</button><button class="btn" id="btnCheck">정답 확인</button></div>
+      <div>
+        <strong id="qMeta"></strong>
+        <div class="muted" id="qIndex"></div>
+      </div>
+      <div class="row">
+        <span class="badge" id="badgeMode">한 문제씩</span>
+        <button class="btn" id="btnHome">홈으로</button>
+        <button class="btn" id="btnCheck">정답 확인</button>
+        <button class="btn hidden" id="btnNext">다음 문제 ▶</button>
+        <button class="btn hidden" id="btnFinish">채점하기</button>
+      </div>
     </div>
     <div id="qStem" style="white-space:pre-wrap;margin-top:12px"></div>
     <div id="qChoices"></div>
     <div class="section"><div class="gridNums" id="qNav"></div></div>
     <div class="section muted" id="judgeNote"></div>
     <div class="section muted" id="explainNote" style="margin-top:8px;white-space:pre-wrap"></div>
+    <div class="section hidden" id="examResult"></div>
   </section>
-  <footer class="muted" style="margin-top:12px">2025년도 제2회 고졸 검정고시(국어 구현) · 공식 정답 반영 · 모의 1회 포함</footer>
+
+  <footer class="muted" style="margin-top:12px">흑백 UI · 한 문제 / 시험 모드 · 틀린 번호 클릭시 해설 보기</footer>
 </div>
+
 <script>
-let MODE="one";const tabOne=document.getElementById('tabOne'),tabExam=document.getElementById('tabExam'),tabMock=document.getElementById('tabMock');
-tabOne.onclick=()=>{MODE="one";setActive(tabOne)};tabExam.onclick=()=>{MODE="exam";setActive(tabExam)};tabMock.onclick=()=>{MODE="mock";setActive(tabMock);document.getElementById('selRound').value='모의1회'};
-function setActive(el){[tabOne,tabExam,tabMock].forEach(b=>b.classList.remove('active'));el.classList.add('active')}
-const selLevel=document.getElementById('selLevel'),selRound=document.getElementById('selRound'),selYear=document.getElementById('selYear'),selSubject=document.getElementById('selSubject'),btnSearch=document.getElementById('btnSearch'),resultList=document.getElementById('resultList'),searchInfo=document.getElementById('searchInfo');
-const screenSelect=document.getElementById('screenSelect'),screenQuiz=document.getElementById('screenQuiz'),btnBack=document.getElementById('btnBack'),btnCheck=document.getElementById('btnCheck'),qMeta=document.getElementById('qMeta'),qIndex=document.getElementById('qIndex'),qStem=document.getElementById('qStem'),qChoices=document.getElementById('qChoices'),qNav=document.getElementById('qNav'),judgeNote=document.getElementById('judgeNote'),explainNote=document.getElementById('explainNote');
-let MANIFEST=null,CURRENT=null,curIdx=0,selected=null;
-fetch('manifest.json').then(r=>r.json()).then(m=>{MANIFEST=m});
-btnSearch.onclick=()=>{if(!MANIFEST){alert('로딩 중입니다.');return}const L=selLevel.value,R=selRound.value,Y=selYear.value,S=selSubject.value;const found=MANIFEST.sets.filter(s=>(L==='전체'||s.level===L)&&(R==='전체'||s.round===R)&&(Y==='전체'||s.year===Number(Y))&&(S==='전체'||s.subject===S));searchInfo.textContent=`총 ${found.length}개 세트`;resultList.innerHTML='';found.forEach(s=>{const a=document.createElement('a');a.href='#';a.textContent=`${s.year||''} ${s.round} ${s.level} ${s.subject}`.trim();a.onclick=(e)=>{e.preventDefault();openSet(s)};resultList.appendChild(a)});if(found.length===0){resultList.innerHTML='<div class="muted">조건에 맞는 세트가 없습니다.</div>'}};
-function openSet(s){fetch(s.path).then(r=>r.json()).then(js=>{CURRENT=js;if(MODE==='one'){const idx=Math.floor(Math.random()*js.questions.length);CURRENT.questions=[js.questions[idx]]}curIdx=0;selected=null;screenSelect.classList.add('hidden');screenQuiz.classList.remove('hidden');renderQuestion();renderNav()})}
-btnBack.onclick=()=>{screenQuiz.classList.add('hidden');screenSelect.classList.remove('hidden');judgeNote.textContent='';explainNote.textContent=''};
-function renderQuestion(){const q=CURRENT.questions[curIdx];qMeta.textContent=`${CURRENT.meta.year||''} ${CURRENT.meta.round} ${CURRENT.meta.level} ${CURRENT.meta.subject}`.trim();qIndex.textContent=`문항 ${q.number} / 총 ${CURRENT.questions.length}`;qStem.textContent=q.stem;qChoices.innerHTML='';selected=null;judgeNote.textContent='';explainNote.textContent='';q.choices.forEach((c,i)=>{const div=document.createElement('div');div.className='choice';div.innerHTML=`<div class="btn" style="width:34px;text-align:center">${i+1}</div><div style="flex:1">${c}</div>`;div.onclick=()=>{selected=i;[...qChoices.children].forEach(el=>el.style.outline='');div.style.outline='2px solid #333'};qChoices.appendChild(div)});if(MODE==='one')qNav.classList.add('hidden');else qNav.classList.remove('hidden')}
-function renderNav(){qNav.innerHTML='';CURRENT.questions.forEach((q,i)=>{const b=document.createElement('button');b.textContent=q.number;b.onclick=()=>{curIdx=i;renderQuestion()};qNav.appendChild(b)})}
-btnCheck.onclick=()=>{const q=CURRENT.questions[curIdx];if(selected==null){alert('보기를 선택하세요.');return}const ok=(selected===q.answerIndex);judgeNote.textContent= ok?'정답입니다.':`오답입니다. 정답은 ${q.answerIndex+1}번.`;judgeNote.style.color= ok?'var(--good)':'var(--bad)';explainNote.textContent=q.explanation?`해설: ${q.explanation}`:''};
+let MODE="one"; // one | exam
+const tabOne=document.getElementById('tabOne'), tabExam=document.getElementById('tabExam');
+function setActive(el){ [tabOne,tabExam].forEach(b=>b.classList.remove('active')); el.classList.add('active'); }
+function goHome(){ screenQuiz.classList.add('hidden'); screenSelect.classList.remove('hidden'); }
+tabOne.onclick=()=>{ MODE="one"; setActive(tabOne); goHome(); };
+tabExam.onclick=()=>{ MODE="exam"; setActive(tabExam); goHome(); };
+
+const screenSelect=document.getElementById('screenSelect'), screenQuiz=document.getElementById('screenQuiz');
+const selType=document.getElementById('selType'), selLevel=document.getElementById('selLevel'), selYear=document.getElementById('selYear'), selSubject=document.getElementById('selSubject');
+const btnSearch=document.getElementById('btnSearch'), resultList=document.getElementById('resultList'), searchInfo=document.getElementById('searchInfo');
+const qMeta=document.getElementById('qMeta'), qIndex=document.getElementById('qIndex'), qStem=document.getElementById('qStem'), qChoices=document.getElementById('qChoices'), qNav=document.getElementById('qNav');
+const judgeNote=document.getElementById('judgeNote'), explainNote=document.getElementById('explainNote'), examResult=document.getElementById('examResult');
+const btnHome=document.getElementById('btnHome'), btnCheck=document.getElementById('btnCheck'), btnNext=document.getElementById('btnNext'), btnFinish=document.getElementById('btnFinish');
+const badgeMode=document.getElementById('badgeMode');
+
+let MANIFEST=null, CURRENT=null, curIdx=0, selected=null, userAnswers=[];
+fetch('manifest.json').then(r=>r.json()).then(m=>{ MANIFEST=m; });
+
+btnSearch.onclick=()=>{
+  if(!MANIFEST){ alert('로딩 중입니다.'); return; }
+  const T=selType.value, L=selLevel.value, Y=selYear.value, S=selSubject.value;
+  const found = MANIFEST.sets.filter(s =>
+    (T==='전체'||s.type===T) && (L==='전체'||s.level===L) && (Y==='전체'||String(s.year)===Y) && (S==='전체'||s.subject.replace('(모의)','').replace('통합(모의)','통합')===S)
+  );
+  searchInfo.textContent=`총 ${found.length}개 세트`;
+  resultList.innerHTML='';
+  found.forEach(s=>{
+    const a=document.createElement('a'); a.href='#';
+    a.textContent=`[${s.type}] ${s.year||''} ${s.level} ${s.subject}`.trim();
+    a.onclick=(e)=>{ e.preventDefault(); openSet(s); };
+    resultList.appendChild(a);
+  });
+  if(found.length===0) resultList.innerHTML='<div class="muted">조건에 맞는 세트가 없습니다.</div>';
+};
+
+btnHome.onclick=()=>{ goHome(); };
+
+function openSet(s){
+  fetch(s.path).then(r=>r.json()).then(js=>{
+    CURRENT=js; badgeMode.textContent=(MODE==='one'?'한 문제씩':'시험으로');
+    screenSelect.classList.add('hidden'); screenQuiz.classList.remove('hidden');
+    curIdx=0; selected=null; userAnswers = new Array(js.questions.length).fill(null);
+    renderQuestion(); renderNav();
+    btnFinish.classList.toggle('hidden', MODE!=='exam');
+    btnNext.classList.toggle('hidden', MODE!=='one');
+    examResult.classList.add('hidden'); examResult.innerHTML='';
+  });
+}
+
+function renderQuestion(){
+  const q=CURRENT.questions[curIdx];
+  qMeta.textContent = `${CURRENT.meta.year||''} ${CURRENT.meta.level||''} ${CURRENT.meta.subject||''}`.trim();
+  qIndex.textContent=`문항 ${q.number} / 총 ${CURRENT.questions.length}`;
+  qStem.textContent=q.stem;
+  qChoices.innerHTML=''; judgeNote.textContent=''; explainNote.textContent='';
+  selected=userAnswers[curIdx];
+  q.choices.forEach((c,i)=>{
+    const div=document.createElement('div'); div.className='choice';
+    div.innerHTML=`<div class="btn" style="width:34px;text-align:center">${i+1}</div><div style="flex:1">${c}</div>`;
+    if(selected===i) div.style.outline='2px solid #333';
+    div.onclick=()=>{ selected=i; userAnswers[curIdx]=i; [...qChoices.children].forEach(el=>el.style.outline=''); div.style.outline='2px solid #333'; };
+    qChoices.appendChild(div);
+  });
+  qNav.classList.toggle('hidden', MODE==='one');
+}
+
+function renderNav(){
+  qNav.innerHTML='';
+  CURRENT.questions.forEach((q,i)=>{
+    const b=document.createElement('button'); b.textContent=q.number;
+    b.onclick=()=>{ curIdx=i; renderQuestion(); };
+    qNav.appendChild(b);
+  });
+}
+
+btnCheck.onclick=()=>{
+  const q=CURRENT.questions[curIdx];
+  if(selected==null){ alert('보기를 선택하세요.'); return; }
+  const ok=(selected===q.answerIndex);
+  judgeNote.textContent = ok?'정답입니다.':`오답입니다. 정답은 ${q.answerIndex+1}번.`;
+  judgeNote.style.color = ok?'var(--good)':'var(--bad)';
+  explainNote.textContent = q.explanation ? `해설: ${q.explanation}` : '';
+};
+
+btnNext.onclick=()=>{
+  if(MODE!=='one') return;
+  if(curIdx<CURRENT.questions.length-1){ curIdx++; selected=null; renderQuestion(); }
+  else { judgeNote.textContent='마지막 문제입니다.'; explainNote.textContent=''; }
+};
+
+btnFinish.onclick=()=>{
+  if(MODE!=='exam') return;
+  let correct=0; const wrongIdx=[];
+  CURRENT.questions.forEach((q,i)=>{ if(userAnswers[i]===q.answerIndex) correct++; else wrongIdx.push(i); });
+  const total=CURRENT.questions.length;
+  const score=Math.round((correct/total)*100);
+  examResult.classList.remove('hidden');
+  examResult.innerHTML=`<hr/><div><strong>점수: ${score}점</strong> (정답 ${correct}/${total})</div>`;
+  if(wrongIdx.length){
+    const div=document.createElement('div'); div.style.marginTop='8px'; div.innerHTML='틀린 문항: ';
+    wrongIdx.forEach(i=>{ const btn=document.createElement('button'); btn.className='btn'; btn.textContent=String(CURRENT.questions[i].number);
+      btn.onclick=()=>{ curIdx=i; renderQuestion(); const q=CURRENT.questions[curIdx]; const sel=userAnswers[curIdx];
+        if(sel!=null){ const ok=(sel===q.answerIndex);
+          judgeNote.textContent= ok?'정답입니다.':`오답입니다. 정답은 ${q.answerIndex+1}번.`;
+          judgeNote.style.color= ok?'var(--good)':'var(--bad)';
+          explainNote.textContent= q.explanation?`해설: ${q.explanation}`:'';
+        }}
+      div.appendChild(btn);
+    });
+    examResult.appendChild(div);
+  } else {
+    examResult.innerHTML += `<div class="muted">틀린 문제가 없습니다. 훌륭해요!</div>`;
+  }
+};
 </script>
-</body></html>
+</body>
+</html>
