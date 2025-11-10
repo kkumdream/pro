@@ -21,16 +21,12 @@ select,.btn{border:1px solid var(--border);background:var(--panel);color:var(--f
 .muted{color:var(--muted)}
 .choice{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--border);border-radius:12px;margin-top:8px;cursor:pointer;background:#0f0f0f}
 .choice.correct{border-color:var(--good)} .choice.wrong{border-color:var(--bad)}
-.gridNums{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:8px}
-.gridNums button{height:40px;border:1px solid var(--border);background:#0f0f0f;color:var(--fg);border-radius:10px}
+.section{margin-top:12px}
+.explain{white-space:pre-wrap;margin-top:8px}
+.fig img{max-width:100%;border:1px solid var(--border);border-radius:8px;margin-top:8px;cursor:zoom-in}
 .topnav{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .hidden{display:none}
 hr{border:0;border-top:1px solid var(--border);margin:16px 0}
-.badge{display:inline-block;border:1px solid var(--border);padding:2px 8px;border-radius:999px;font-size:12px;color:var(--muted)}
-.section{margin-top:12px}
-.explain{white-space:pre-wrap;margin-top:8px}
-.stickybottom{position:sticky;bottom:0;background:var(--panel);padding:12px;border-top:1px solid var(--border)}
-.fig img{max-width:100%;border:1px solid var(--border);border-radius:8px;margin-top:8px;cursor:zoom-in}
 </style>
 </head>
 <body>
@@ -46,37 +42,24 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
   <section class="card" id="screenSelect">
     <div class="row">
       <label>항목
-        <select id="selType">
-          <option value="전체">전체</option><option>기출</option><option>모의고사</option>
-        </select>
+        <select id="selType"><option>기출</option></select>
       </label>
       <label>난이도
-        <select id="selLevel">
-          <option value="전체">전체</option><option>초졸</option><option>중졸</option><option selected>고졸</option>
-        </select>
+        <select id="selLevel"><option>고졸</option></select>
       </label>
       <label>연도
-        <select id="selYear">
-          <option value="전체">전체</option><option selected>2025</option>
-        </select>
+        <select id="selYear"><option>2025</option></select>
       </label>
       <label>과목
-        <select id="selSubject">
-          <option value="전체">전체</option>
-          <option>국어</option><option>수학</option><option>영어</option><option>사회</option><option>과학</option>
-          <option>한국사</option><option>도덕</option><option>기술·가정</option><option>음악</option><option>미술</option><option>체육</option>
-          <option>통합</option>
-        </select>
+        <select id="selSubject"><option>수학</option></select>
       </label>
       <button class="btn primary" id="btnSearch">검색</button>
     </div>
-    <div style="margin-top:10px" class="muted">※ 탭을 누르면 항상 홈으로 돌아옵니다.</div>
     <hr/>
     <div class="muted" id="searchInfo">검색 전입니다.</div>
     <div class="list" id="resultList"></div>
   </section>
 
-  <!-- One-by-one -->
   <section class="card hidden" id="screenOne">
     <div class="topnav">
       <div>
@@ -101,7 +84,6 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
     <div class="section explain" id="explainOne"></div>
   </section>
 
-  <!-- Exam -->
   <section class="card hidden" id="screenExam">
     <div class="topnav">
       <div>
@@ -115,16 +97,9 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
       </div>
     </div>
     <div id="examList" class="section"></div>
-    <div class="stickybottom">
-      <div class="row" style="justify-content:space-between;align-items:center">
-        <div class="muted">모든 문항을 풀이한 뒤 눌러주세요.</div>
-        <button class="btn" id="gradeBottom">채점하기</button>
-      </div>
-    </div>
+    <div class="section" style="display:flex;justify-content:flex-end"><button class="btn" id="gradeBottom">채점하기</button></div>
     <div class="section hidden" id="examResult"></div>
   </section>
-
-  <footer class="muted" style="margin-top:12px">흑백 UI · 그림 클릭 시 확대 · x², x³ 표기 적용</footer>
 </div>
 
 <script>
@@ -136,141 +111,79 @@ tabOne.onclick=()=>{ MODE="one"; setActive(tabOne); goHome(); };
 tabExam.onclick=()=>{ MODE="exam"; setActive(tabExam); goHome(); };
 
 const screenSelect=document.getElementById('screenSelect'), screenOne=document.getElementById('screenOne'), screenExam=document.getElementById('screenExam');
-const selType=document.getElementById('selType'), selLevel=document.getElementById('selLevel'), selYear=document.getElementById('selYear'), selSubject=document.getElementById('selSubject');
 const btnSearch=document.getElementById('btnSearch'), resultList=document.getElementById('resultList'), searchInfo=document.getElementById('searchInfo');
-
 const metaOne=document.getElementById('metaOne'), idxOne=document.getElementById('idxOne'), stemOne=document.getElementById('stemOne'), figsOne=document.getElementById('figsOne'), choicesOne=document.getElementById('choicesOne');
 const prevOne=document.getElementById('prevOne'), nextOne=document.getElementById('nextOne'), judgeOne=document.getElementById('judgeOne'), explainOne=document.getElementById('explainOne');
-const homeFromOne=document.getElementById('homeFromOne');
-
-const metaExam=document.getElementById('metaExam'), idxExam=document.getElementById('idxExam'), examList=document.getElementById('examList');
-const gradeTop=document.getElementById('gradeTop'), gradeBottom=document.getElementById('gradeBottom'), examResult=document.getElementById('examResult');
-const homeFromExam=document.getElementById('homeFromExam');
-
+const metaExam=document.getElementById('metaExam'), examList=document.getElementById('examList'), homeFromExam=document.getElementById('homeFromExam'), gradeTop=document.getElementById('gradeTop'), gradeBottom=document.getElementById('gradeBottom'), examResult=document.getElementById('examResult');
 let MANIFEST=null, CURRENT=null, curIdx=0, userAnswers=[];
+
 fetch('manifest.json').then(r=>r.json()).then(m=>{ MANIFEST=m; });
 
 btnSearch.onclick=()=>{
-  if(!MANIFEST){ alert('로딩 중입니다.'); return; }
-  const T=selType.value, L=selLevel.value, Y=selYear.value, S=selSubject.value;
-  const found = MANIFEST.sets.filter(s =>
-    (T==='전체'||s.type===T) && (L==='전체'||s.level===L) && (Y==='전체'||String(s.year)===Y) && (S==='전체'||s.subject===S)
-  );
-  searchInfo.textContent=`총 ${found.length}개 세트`;
-  resultList.innerHTML='';
-  found.forEach(s=>{
-    const a=document.createElement('a'); a.href='#';
-    a.textContent=`[${s.type}] ${s.year||''} ${s.level} ${s.subject}`.trim();
-    a.onclick=(e)=>{ e.preventDefault(); openSet(s); };
-    resultList.appendChild(a);
-  });
-  if(found.length===0) resultList.innerHTML='<div class="muted">조건에 맞는 세트가 없습니다.</div>';
+  const a=document.createElement('a'); a.href='#'; a.textContent='[기출] 2025 고졸 수학';
+  a.onclick=(e)=>{ e.preventDefault(); openSet({path:'data/2025/2차/고졸/수학.json'}); };
+  resultList.innerHTML=''; resultList.appendChild(a); searchInfo.textContent='총 1개 세트';
 };
 
-homeFromOne.onclick=()=>{ goHome(); };
-homeFromExam.onclick=()=>{ goHome(); };
-
-function openSet(s){
-  fetch(s.path).then(r=>r.json()).then(js=>{
-    CURRENT=js;
-    if(MODE==='one'){ openOne(); } else { openExam(); }
-  });
-}
-
+function openSet(s){ fetch(s.path).then(r=>r.json()).then(js=>{ CURRENT=js; if(MODE==='one'){ openOne(); } else { openExam(); } }); }
 function renderFigures(container, q){
-  container.innerHTML='';
-  if(!q.figures) return;
-  q.figures.forEach(fig=>{
-    if(!fig.src) return;
-    const img=document.createElement('img');
-    img.src=fig.src; img.alt=fig.alt||'figure';
-    img.onclick=()=>window.open(fig.src,'_blank');
-    container.appendChild(img);
-    if(fig.caption){ const cap=document.createElement('div'); cap.className='muted'; cap.textContent=fig.caption; container.appendChild(cap); }
-  });
+  container.innerHTML=''; if(!q.figures) return;
+  q.figures.forEach(fig=>{ if(!fig.src) return; const img=document.createElement('img'); img.src=fig.src; img.alt=fig.alt||'figure'; container.appendChild(img);
+    if(fig.caption){ const cap=document.createElement('div'); cap.className='muted'; cap.textContent=fig.caption; container.appendChild(cap); } });
 }
 
-// One-by-one
 function openOne(){
   screenSelect.classList.add('hidden'); screenExam.classList.add('hidden'); screenOne.classList.remove('hidden');
-  curIdx=0; userAnswers = new Array(CURRENT.questions.length).fill(null);
-  renderOne();
+  curIdx=0; userAnswers=new Array(CURRENT.questions.length).fill(null); renderOne();
 }
 function renderOne(){
   const q=CURRENT.questions[curIdx];
-  metaOne.textContent = `${CURRENT.meta.year||''} ${CURRENT.meta.level||''} ${CURRENT.meta.subject||''}`.trim();
+  metaOne.textContent=`${CURRENT.meta.year} ${CURRENT.meta.level} ${CURRENT.meta.subject}`;
   idxOne.textContent=`문항 ${q.number} / 총 ${CURRENT.questions.length}`;
-  stemOne.textContent=q.stem;
-  renderFigures(figsOne, q);
+  stemOne.textContent=q.stem; renderFigures(figsOne, q);
   choicesOne.innerHTML=''; judgeOne.textContent=''; explainOne.textContent='';
-  q.choices.forEach((c,i)=>{
-    const div=document.createElement('div'); div.className='choice';
+  q.choices.forEach((c,i)=>{ const div=document.createElement('div'); div.className='choice';
     div.innerHTML=`<div class="btn" style="width:34px;text-align:center">${i+1}</div><div style="flex:1">${c}</div>`;
-    div.onclick=()=>{
-      userAnswers[curIdx]=i;
-      const ok=(i===q.answerIndex);
-      judgeOne.textContent = ok?'정답입니다.':`오답입니다. 정답은 ${q.answerIndex+1}번.`;
-      judgeOne.style.color = ok?'var(--good)':'var(--bad)';
-      explainOne.textContent = q.explanation || '';
-      [...choicesOne.children].forEach(el=>{ el.classList.remove('correct','wrong'); el.style.outline=''; });
-      div.classList.add(ok?'correct':'wrong'); div.style.outline='2px solid #333';
-    };
-    choicesOne.appendChild(div);
-  });
-  prevOne.disabled = (curIdx===0);
-  nextOne.disabled = (curIdx===CURRENT.questions.length-1);
+    div.onclick=()=>{ userAnswers[curIdx]=i; const ok=(i===q.answerIndex);
+      judgeOne.textContent = ok?'정답입니다.':`오답입니다. 정답은 ${q.answerIndex+1}번.`; judgeOne.style.color = ok?'var(--good)':'var(--bad)';
+      explainOne.textContent=q.explanation||''; [...choicesOne.children].forEach(el=>{ el.classList.remove('correct','wrong'); el.style.outline=''; });
+      div.classList.add(ok?'correct':'wrong'); div.style.outline='2px solid #333'; };
+    choicesOne.appendChild(div); });
+  prevOne.disabled=(curIdx===0); nextOne.disabled=(curIdx===CURRENT.questions.length-1);
 }
-prevOne.onclick=()=>{ if(curIdx>0){ curIdx--; renderOne(); }};
-nextOne.onclick=()=>{ if(curIdx<CURRENT.questions.length-1){ curIdx++; renderOne(); }};
+prevOne.onclick=()=>{ if(curIdx>0){ curIdx--; renderOne(); }}; nextOne.onclick=()=>{ if(curIdx<CURRENT.questions.length-1){ curIdx++; renderOne(); }};
 
-// Exam
 function openExam(){
   screenSelect.classList.add('hidden'); screenOne.classList.add('hidden'); screenExam.classList.remove('hidden');
-  userAnswers = new Array(CURRENT.questions.length).fill(null);
-  metaExam.textContent = `${CURRENT.meta.year||''} ${CURRENT.meta.level||''} ${CURRENT.meta.subject||''}`.trim();
+  userAnswers=new Array(CURRENT.questions.length).fill(null);
+  metaExam.textContent=`${CURRENT.meta.year} ${CURRENT.meta.level} ${CURRENT.meta.subject}`;
   examList.innerHTML=''; examResult.classList.add('hidden'); examResult.innerHTML='';
-  CURRENT.questions.forEach((q,qi)=>{
-    const wrap=document.createElement('div'); wrap.className='section'; wrap.id=`q${q.number}`;
-    wrap.innerHTML = `<div><strong>문항 ${q.number}</strong></div><div style="white-space:pre-wrap;margin-top:6px">${q.stem}</div><div class='section fig' id='figs_ex_${q.number}'></div>`;
-    // Figures
-    const figc=document.getElementById('figs_ex_'+q.number);
-    if(q.figures){ q.figures.forEach(fig=>{ if(!fig.src) return; const img=document.createElement('img'); img.src=fig.src; img.style.maxWidth='100%'; img.style.border='1px solid var(--border)'; img.style.borderRadius='8px'; img.style.marginTop='8px'; img.onclick=()=>window.open(fig.src,'_blank'); figc.appendChild(img); if(fig.caption){ const cap=document.createElement('div'); cap.className='muted'; cap.textContent=fig.caption; figc.appendChild(cap);} }); }
-    const box=document.createElement('div'); box.style.marginTop='6px';
-    q.choices.forEach((c,i)=>{
-      const div=document.createElement('div'); div.className='choice';
-      div.innerHTML=`<div class="btn" style="width:34px;text-align:center">${i+1}</div><div style="flex:1">${c}</div>`;
-      div.onclick=()=>{ userAnswers[qi]=i; [...box.children].forEach(el=>el.style.outline=''); div.style.outline='2px solid #333'; };
-      box.appendChild(div);
-    });
-    const exp=document.createElement('div'); exp.className='explain muted'; exp.style.display='none'; exp.id=`exp${q.number}`;
-    wrap.appendChild(box); wrap.appendChild(exp); examList.appendChild(wrap);
-  });
+  CURRENT.questions.forEach((q,qi)=>{ try {
+      const wrap=document.createElement('div'); wrap.className='section'; wrap.id=`q${q.number}`;
+      wrap.innerHTML = `<div><strong>문항 ${q.number}</strong></div><div style="white-space:pre-wrap;margin-top:6px">${q.stem}</div><div class='section fig' id='figs_ex_${q.number}'></div>`;
+      const figc = wrap.querySelector('#figs_ex_'+q.number);
+      if(q.figures){ q.figures.forEach(fig=>{ if(!fig.src) return; const img=document.createElement('img'); img.src=fig.src; img.style.maxWidth='100%'; figc.appendChild(img);
+        if(fig.caption){ const cap=document.createElement('div'); cap.className='muted'; cap.textContent=fig.caption; figc.appendChild(cap);} }); }
+      const box=document.createElement('div'); box.style.marginTop='6px';
+      q.choices.forEach((c,i)=>{ const div=document.createElement('div'); div.className='choice';
+        div.innerHTML=`<div class="btn" style="width:34px;text-align:center">${i+1}</div><div style="flex:1">${c}</div>`;
+        div.onclick=()=>{ userAnswers[qi]=i; [...box.children].forEach(el=>el.style.outline=''); div.style.outline='2px solid #333'; };
+        box.appendChild(div); });
+      const exp=document.createElement('div'); exp.className='explain muted'; exp.style.display='none'; exp.id=`exp${q.number}`;
+      wrap.appendChild(box); wrap.appendChild(exp); examList.appendChild(wrap);
+    } catch(e){ console.error('문항 렌더 오류', q?.number, e); } });
 }
 function gradeExam(){
   let correct=0; const wrongNums=[];
   CURRENT.questions.forEach((q,i)=>{ if(userAnswers[i]===q.answerIndex) correct++; else wrongNums.push(q.number); });
   const total=CURRENT.questions.length; const score=Math.round((correct/total)*100);
-  examResult.classList.remove('hidden');
-  examResult.innerHTML=`<hr/><div><strong>점수: ${score}점</strong> (정답 ${correct}/${total})</div>`;
-  if(wrongNums.length){
-    const div=document.createElement('div'); div.style.marginTop='8px'; div.innerHTML='틀린 문항: ';
-    wrongNums.forEach(n=>{
-      const btn=document.createElement('button'); btn.className='btn'; btn.textContent=String(n);
-      btn.onclick=()=>{
-        const q = CURRENT.questions.find(qq=>qq.number===n);
-        const exp = document.getElementById('exp'+n);
-        if(q && exp){
-          exp.style.display='block';
-          exp.textContent = `정답: ${q.answerIndex+1}번\n해설: ${q.explanation||''}`;
-          document.getElementById('q'+n).scrollIntoView({behavior:'smooth', block:'start'});
-        }
-      };
-      div.appendChild(btn);
-    });
-    examResult.appendChild(div);
-  } else {
-    examResult.innerHTML += `<div class="muted">틀린 문제가 없습니다. 훌륭해요!</div>`;
-  }
+  examResult.classList.remove('hidden'); examResult.innerHTML=`<hr/><div><strong>점수: ${score}점</strong> (정답 ${correct}/${total})</div>`;
+  if(wrongNums.length){ const div=document.createElement('div'); div.style.marginTop='8px'; div.innerHTML='틀린 문항: ';
+    wrongNums.forEach(n=>{ const btn=document.createElement('button'); btn.className='btn'; btn.textContent=String(n);
+      btn.onclick=()=>{ const q = CURRENT.questions.find(qq=>qq.number===n); const exp=document.getElementById('exp'+n);
+        if(q && exp){ exp.style.display='block'; exp.textContent=`정답: ${q.answerIndex+1}번\n해설: ${q.explanation||''}`;
+          document.getElementById('q'+n).scrollIntoView({behavior:'smooth', block:'start'}); } }; div.appendChild(btn); }); examResult.appendChild(div);
+  } else { examResult.innerHTML += `<div class="muted">틀린 문제가 없습니다. 훌륭해요!</div>`; }
 }
 gradeTop.onclick=gradeExam; gradeBottom.onclick=gradeExam;
 </script>

@@ -90,14 +90,7 @@
         "9"
       ],
       "answerIndex": 0,
-      "explanation": "정답키 반영 / 초안",
-      "figures": [
-        {
-          "src": "assets/math/2025-2/q7.png",
-          "caption": "문항 그림",
-          "alt": "문항 관련 그림"
-        }
-      ]
+      "explanation": "정답키 반영 / 초안"
     },
     {
       "number": 8,
@@ -109,14 +102,7 @@
         "11"
       ],
       "answerIndex": 3,
-      "explanation": "정답키 반영 / 초안",
-      "figures": [
-        {
-          "src": "assets/math/2025-2/q8.png",
-          "caption": "문항 그림",
-          "alt": "문항 관련 그림"
-        }
-      ]
+      "explanation": "정답키 반영 / 초안"
     },
     {
       "number": 9,
@@ -140,14 +126,7 @@
         "9"
       ],
       "answerIndex": 2,
-      "explanation": "정답키 반영 / 초안",
-      "figures": [
-        {
-          "src": "assets/math/2025-2/q10.png",
-          "caption": "문항 그림",
-          "alt": "문항 관련 그림"
-        }
-      ]
+      "explanation": "정답키 반영 / 초안"
     },
     {
       "number": 11,
@@ -171,14 +150,7 @@
         "(x−3)²+(y−3)²=9"
       ],
       "answerIndex": 3,
-      "explanation": "정답키 반영 / r=3",
-      "figures": [
-        {
-          "src": "assets/math/2025-2/q12.png",
-          "caption": "문항 그림",
-          "alt": "문항 관련 그림"
-        }
-      ]
+      "explanation": "정답키 반영 / r=3"
     },
     {
       "number": 13,
@@ -190,14 +162,7 @@
         "(−3,−1)"
       ],
       "answerIndex": 1,
-      "explanation": "정답키 반영 / x부호 반전",
-      "figures": [
-        {
-          "src": "assets/math/2025-2/q13.png",
-          "caption": "문항 그림",
-          "alt": "문항 관련 그림"
-        }
-      ]
+      "explanation": "정답키 반영 / x부호 반전"
     },
     {
       "number": 14,
@@ -245,14 +210,7 @@
         "4"
       ],
       "answerIndex": 0,
-      "explanation": "정답키 반영 / 그림 참조",
-      "figures": [
-        {
-          "src": "assets/math/2025-2/q17.png",
-          "caption": "문항 그림",
-          "alt": "문항 관련 그림"
-        }
-      ]
+      "explanation": "정답키 반영 / 그림 참조"
     },
     {
       "number": 18,
@@ -264,14 +222,7 @@
         "17"
       ],
       "answerIndex": 2,
-      "explanation": "정답키 반영 / 그림 참조",
-      "figures": [
-        {
-          "src": "assets/math/2025-2/q18.png",
-          "caption": "문항 그림",
-          "alt": "문항 관련 그림"
-        }
-      ]
+      "explanation": "정답키 반영 / 그림 참조"
     },
     {
       "number": 19,
@@ -283,14 +234,7 @@
         "27"
       ],
       "answerIndex": 2,
-      "explanation": "정답키 반영 / 그림 참조",
-      "figures": [
-        {
-          "src": "assets/math/2025-2/q19.png",
-          "caption": "문항 그림",
-          "alt": "문항 관련 그림"
-        }
-      ]
+      "explanation": "정답키 반영 / 그림 참조"
     },
     {
       "number": 20,
@@ -302,14 +246,7 @@
         "9"
       ],
       "answerIndex": 0,
-      "explanation": "정답키 반영 / C(4,2)=6",
-      "figures": [
-        {
-          "src": "assets/math/2025-2/q20.png",
-          "caption": "문항 그림",
-          "alt": "문항 관련 그림"
-        }
-      ]
+      "explanation": "정답키 반영 / C(4,2)=6"
     }
   ]
 }
