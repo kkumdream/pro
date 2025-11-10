@@ -20,12 +20,16 @@ select,.btn{border:1px solid var(--border);background:var(--panel);color:var(--f
 .list a+a{margin-top:8px}
 .muted{color:var(--muted)}
 .choice{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--border);border-radius:12px;margin-top:8px;cursor:pointer;background:#0f0f0f}
+.choice.correct{border-color:var(--good)} .choice.wrong{border-color:var(--bad)}
 .gridNums{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:8px}
 .gridNums button{height:40px;border:1px solid var(--border);background:#0f0f0f;color:var(--fg);border-radius:10px}
 .topnav{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .hidden{display:none}
 hr{border:0;border-top:1px solid var(--border);margin:16px 0}
 .badge{display:inline-block;border:1px solid var(--border);padding:2px 8px;border-radius:999px;font-size:12px;color:var(--muted)}
+.section{margin-top:12px}
+.explain{white-space:pre-wrap;margin-top:8px}
+.stickybottom{position:sticky;bottom:0;background:var(--panel);padding:12px;border-top:1px solid var(--border)}
 </style>
 </head>
 <body>
@@ -71,48 +75,76 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
     <div class="list" id="resultList"></div>
   </section>
 
-  <section class="card hidden" id="screenQuiz">
+  <section class="card hidden" id="screenOne">
     <div class="topnav">
       <div>
-        <strong id="qMeta"></strong>
-        <div class="muted" id="qIndex"></div>
+        <strong id="metaOne"></strong>
+        <div class="muted" id="idxOne"></div>
       </div>
       <div class="row">
-        <span class="badge" id="badgeMode">한 문제씩</span>
-        <button class="btn" id="btnHome">홈으로</button>
-        <button class="btn" id="btnCheck">정답 확인</button>
-        <button class="btn hidden" id="btnNext">다음 문제 ▶</button>
-        <button class="btn hidden" id="btnFinish">채점하기</button>
+        <span class="badge">한 문제씩</span>
+        <button class="btn" id="homeFromOne">홈으로</button>
       </div>
     </div>
-    <div id="qStem" style="white-space:pre-wrap;margin-top:12px"></div>
-    <div id="qChoices"></div>
-    <div class="section"><div class="gridNums" id="qNav"></div></div>
-    <div class="section muted" id="judgeNote"></div>
-    <div class="section muted" id="explainNote" style="margin-top:8px;white-space:pre-wrap"></div>
+    <div id="stemOne" style="white-space:pre-wrap;margin-top:12px"></div>
+    <div id="choicesOne"></div>
+    <div class="section">
+      <div class="row">
+        <button class="btn" id="prevOne">◀ 이전 문제</button>
+        <button class="btn" id="nextOne">다음 문제 ▶</button>
+      </div>
+    </div>
+    <div class="section muted" id="judgeOne"></div>
+    <div class="section explain" id="explainOne"></div>
+  </section>
+
+  <section class="card hidden" id="screenExam">
+    <div class="topnav">
+      <div>
+        <strong id="metaExam"></strong>
+        <div class="muted" id="idxExam">전체 문항이 한 번에 표시됩니다.</div>
+      </div>
+      <div class="row">
+        <span class="badge">시험으로</span>
+        <button class="btn" id="homeFromExam">홈으로</button>
+        <button class="btn" id="gradeTop">채점하기</button>
+      </div>
+    </div>
+    <div id="examList" class="section"></div>
+    <div class="stickybottom">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div class="muted">모든 문항을 풀이한 뒤 눌러주세요.</div>
+        <button class="btn" id="gradeBottom">채점하기</button>
+      </div>
+    </div>
     <div class="section hidden" id="examResult"></div>
   </section>
 
-  <footer class="muted" style="margin-top:12px">흑백 UI · 한 문제 / 시험 모드 · 틀린 번호 클릭시 해설 보기</footer>
+  <footer class="muted" style="margin-top:12px">흑백 UI · 한 문제 / 시험 모드 · 틀린 번호 클릭시 해당 문항/해설 보기</footer>
 </div>
 
 <script>
 let MODE="one"; // one | exam
 const tabOne=document.getElementById('tabOne'), tabExam=document.getElementById('tabExam');
 function setActive(el){ [tabOne,tabExam].forEach(b=>b.classList.remove('active')); el.classList.add('active'); }
-function goHome(){ screenQuiz.classList.add('hidden'); screenSelect.classList.remove('hidden'); }
+function goHome(){ screenSelect.classList.remove('hidden'); screenOne.classList.add('hidden'); screenExam.classList.add('hidden'); }
 tabOne.onclick=()=>{ MODE="one"; setActive(tabOne); goHome(); };
 tabExam.onclick=()=>{ MODE="exam"; setActive(tabExam); goHome(); };
 
-const screenSelect=document.getElementById('screenSelect'), screenQuiz=document.getElementById('screenQuiz');
+const screenSelect=document.getElementById('screenSelect'), screenOne=document.getElementById('screenOne'), screenExam=document.getElementById('screenExam');
+
 const selType=document.getElementById('selType'), selLevel=document.getElementById('selLevel'), selYear=document.getElementById('selYear'), selSubject=document.getElementById('selSubject');
 const btnSearch=document.getElementById('btnSearch'), resultList=document.getElementById('resultList'), searchInfo=document.getElementById('searchInfo');
-const qMeta=document.getElementById('qMeta'), qIndex=document.getElementById('qIndex'), qStem=document.getElementById('qStem'), qChoices=document.getElementById('qChoices'), qNav=document.getElementById('qNav');
-const judgeNote=document.getElementById('judgeNote'), explainNote=document.getElementById('explainNote'), examResult=document.getElementById('examResult');
-const btnHome=document.getElementById('btnHome'), btnCheck=document.getElementById('btnCheck'), btnNext=document.getElementById('btnNext'), btnFinish=document.getElementById('btnFinish');
-const badgeMode=document.getElementById('badgeMode');
 
-let MANIFEST=null, CURRENT=null, curIdx=0, selected=null, userAnswers=[];
+const metaOne=document.getElementById('metaOne'), idxOne=document.getElementById('idxOne'), stemOne=document.getElementById('stemOne'), choicesOne=document.getElementById('choicesOne');
+const prevOne=document.getElementById('prevOne'), nextOne=document.getElementById('nextOne'), judgeOne=document.getElementById('judgeOne'), explainOne=document.getElementById('explainOne');
+const homeFromOne=document.getElementById('homeFromOne');
+
+const metaExam=document.getElementById('metaExam'), idxExam=document.getElementById('idxExam'), examList=document.getElementById('examList');
+const gradeTop=document.getElementById('gradeTop'), gradeBottom=document.getElementById('gradeBottom'), examResult=document.getElementById('examResult');
+const homeFromExam=document.getElementById('homeFromExam');
+
+let MANIFEST=null, CURRENT=null, curIdx=0, userAnswers=[];
 fetch('manifest.json').then(r=>r.json()).then(m=>{ MANIFEST=m; });
 
 btnSearch.onclick=()=>{
@@ -132,85 +164,98 @@ btnSearch.onclick=()=>{
   if(found.length===0) resultList.innerHTML='<div class="muted">조건에 맞는 세트가 없습니다.</div>';
 };
 
-btnHome.onclick=()=>{ goHome(); };
+homeFromOne.onclick=()=>{ goHome(); };
+homeFromExam.onclick=()=>{ goHome(); };
 
 function openSet(s){
   fetch(s.path).then(r=>r.json()).then(js=>{
-    CURRENT=js; badgeMode.textContent=(MODE==='one'?'한 문제씩':'시험으로');
-    screenSelect.classList.add('hidden'); screenQuiz.classList.remove('hidden');
-    curIdx=0; selected=null; userAnswers = new Array(js.questions.length).fill(null);
-    renderQuestion(); renderNav();
-    btnFinish.classList.toggle('hidden', MODE!=='exam');
-    btnNext.classList.toggle('hidden', MODE!=='one');
-    examResult.classList.add('hidden'); examResult.innerHTML='';
+    CURRENT=js;
+    if(MODE==='one'){ openOne(); } else { openExam(); }
   });
 }
 
-function renderQuestion(){
+// One-by-one mode
+function openOne(){
+  screenSelect.classList.add('hidden'); screenExam.classList.add('hidden'); screenOne.classList.remove('hidden');
+  curIdx=0; userAnswers = new Array(CURRENT.questions.length).fill(null);
+  renderOne();
+}
+
+function renderOne(){
   const q=CURRENT.questions[curIdx];
-  qMeta.textContent = `${CURRENT.meta.year||''} ${CURRENT.meta.level||''} ${CURRENT.meta.subject||''}`.trim();
-  qIndex.textContent=`문항 ${q.number} / 총 ${CURRENT.questions.length}`;
-  qStem.textContent=q.stem;
-  qChoices.innerHTML=''; judgeNote.textContent=''; explainNote.textContent='';
-  selected=userAnswers[curIdx];
+  metaOne.textContent = `${CURRENT.meta.year||''} ${CURRENT.meta.level||''} ${CURRENT.meta.subject||''}`.trim();
+  idxOne.textContent=`문항 ${q.number} / 총 ${CURRENT.questions.length}`;
+  stemOne.textContent=q.stem;
+  choicesOne.innerHTML=''; judgeOne.textContent=''; explainOne.textContent='';
   q.choices.forEach((c,i)=>{
     const div=document.createElement('div'); div.className='choice';
     div.innerHTML=`<div class="btn" style="width:34px;text-align:center">${i+1}</div><div style="flex:1">${c}</div>`;
-    if(selected===i) div.style.outline='2px solid #333';
-    div.onclick=()=>{ selected=i; userAnswers[curIdx]=i; [...qChoices.children].forEach(el=>el.style.outline=''); div.style.outline='2px solid #333'; };
-    qChoices.appendChild(div);
+    div.onclick=()=>{
+      userAnswers[curIdx]=i;
+      const ok=(i===q.answerIndex);
+      judgeOne.textContent = ok?'정답입니다.':`오답입니다. 정답은 ${q.answerIndex+1}번.`;
+      judgeOne.style.color = ok?'var(--good)':'var(--bad)';
+      explainOne.textContent = q.explanation || '';
+      [...choicesOne.children].forEach(el=>{ el.classList.remove('correct','wrong'); el.style.outline=''; });
+      div.classList.add(ok?'correct':'wrong'); div.style.outline='2px solid #333';
+    };
+    choicesOne.appendChild(div);
   });
-  qNav.classList.toggle('hidden', MODE==='one');
+  prevOne.disabled = (curIdx===0);
+  nextOne.disabled = (curIdx===CURRENT.questions.length-1);
 }
 
-function renderNav(){
-  qNav.innerHTML='';
-  CURRENT.questions.forEach((q,i)=>{
-    const b=document.createElement('button'); b.textContent=q.number;
-    b.onclick=()=>{ curIdx=i; renderQuestion(); };
-    qNav.appendChild(b);
+prevOne.onclick=()=>{ if(curIdx>0){ curIdx--; renderOne(); }};
+nextOne.onclick=()=>{ if(curIdx<CURRENT.questions.length-1){ curIdx++; renderOne(); }};
+
+// Exam mode (all at once)
+function openExam(){
+  screenSelect.classList.add('hidden'); screenOne.classList.add('hidden'); screenExam.classList.remove('hidden');
+  userAnswers = new Array(CURRENT.questions.length).fill(null);
+  metaExam.textContent = `${CURRENT.meta.year||''} ${CURRENT.meta.level||''} ${CURRENT.meta.subject||''}`.trim();
+  examList.innerHTML=''; examResult.classList.add('hidden'); examResult.innerHTML='';
+  CURRENT.questions.forEach((q,qi)=>{
+    const wrap=document.createElement('div'); wrap.className='section'; wrap.id=`q${q.number}`;
+    wrap.innerHTML = `<div><strong>문항 ${q.number}</strong></div><div style="white-space:pre-wrap;margin-top:6px">${q.stem}</div>`;
+    const box=document.createElement('div'); box.style.marginTop='6px';
+    q.choices.forEach((c,i)=>{
+      const div=document.createElement('div'); div.className='choice';
+      div.innerHTML=`<div class="btn" style="width:34px;text-align:center">${i+1}</div><div style="flex:1">${c}</div>`;
+      div.onclick=()=>{ userAnswers[qi]=i; [...box.children].forEach(el=>el.style.outline=''); div.style.outline='2px solid #333'; };
+      box.appendChild(div);
+    });
+    const exp=document.createElement('div'); exp.className='explain muted'; exp.style.display='none'; exp.id=`exp${q.number}`;
+    wrap.appendChild(box); wrap.appendChild(exp); examList.appendChild(wrap);
   });
 }
 
-btnCheck.onclick=()=>{
-  const q=CURRENT.questions[curIdx];
-  if(selected==null){ alert('보기를 선택하세요.'); return; }
-  const ok=(selected===q.answerIndex);
-  judgeNote.textContent = ok?'정답입니다.':`오답입니다. 정답은 ${q.answerIndex+1}번.`;
-  judgeNote.style.color = ok?'var(--good)':'var(--bad)';
-  explainNote.textContent = q.explanation ? `해설: ${q.explanation}` : '';
-};
-
-btnNext.onclick=()=>{
-  if(MODE!=='one') return;
-  if(curIdx<CURRENT.questions.length-1){ curIdx++; selected=null; renderQuestion(); }
-  else { judgeNote.textContent='마지막 문제입니다.'; explainNote.textContent=''; }
-};
-
-btnFinish.onclick=()=>{
-  if(MODE!=='exam') return;
-  let correct=0; const wrongIdx=[];
-  CURRENT.questions.forEach((q,i)=>{ if(userAnswers[i]===q.answerIndex) correct++; else wrongIdx.push(i); });
-  const total=CURRENT.questions.length;
-  const score=Math.round((correct/total)*100);
+function gradeExam(){
+  let correct=0; const wrongNums=[];
+  CURRENT.questions.forEach((q,i)=>{ if(userAnswers[i]===q.answerIndex) correct++; else wrongNums.push(q.number); });
+  const total=CURRENT.questions.length; const score=Math.round((correct/total)*100);
   examResult.classList.remove('hidden');
   examResult.innerHTML=`<hr/><div><strong>점수: ${score}점</strong> (정답 ${correct}/${total})</div>`;
-  if(wrongIdx.length){
+  if(wrongNums.length){
     const div=document.createElement('div'); div.style.marginTop='8px'; div.innerHTML='틀린 문항: ';
-    wrongIdx.forEach(i=>{ const btn=document.createElement('button'); btn.className='btn'; btn.textContent=String(CURRENT.questions[i].number);
-      btn.onclick=()=>{ curIdx=i; renderQuestion(); const q=CURRENT.questions[curIdx]; const sel=userAnswers[curIdx];
-        if(sel!=null){ const ok=(sel===q.answerIndex);
-          judgeNote.textContent= ok?'정답입니다.':`오답입니다. 정답은 ${q.answerIndex+1}번.`;
-          judgeNote.style.color= ok?'var(--good)':'var(--bad)';
-          explainNote.textContent= q.explanation?`해설: ${q.explanation}`:'';
-        }}
+    wrongNums.forEach(n=>{
+      const btn=document.createElement('button'); btn.className='btn'; btn.textContent=String(n);
+      btn.onclick=()=>{
+        const q = CURRENT.questions.find(qq=>qq.number===n);
+        const exp = document.getElementById('exp'+n);
+        if(q && exp){
+          exp.style.display='block';
+          exp.textContent = `정답: ${q.answerIndex+1}번\n해설: ${q.explanation||''}`;
+          document.getElementById('q'+n).scrollIntoView({behavior:'smooth', block:'start'});
+        }
+      };
       div.appendChild(btn);
     });
     examResult.appendChild(div);
   } else {
     examResult.innerHTML += `<div class="muted">틀린 문제가 없습니다. 훌륭해요!</div>`;
   }
-};
+}
+gradeTop.onclick=gradeExam; gradeBottom.onclick=gradeExam;
 </script>
 </body>
 </html>
