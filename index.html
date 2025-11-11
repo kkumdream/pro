@@ -61,7 +61,7 @@
   <div class="app">
     <header>
       <div class="brand">노원구 꿈드림<small>검정고시 문제 풀이</small></div>
-      <div class="help">필터로 검색해 원하는 회차·과목을 선택해 시작하세요.</div>
+      <div class="help">항목을 고르면 연도 드롭다운이 최신년도부터 자동으로 채워집니다. (manifest.json 기반)</div>
     </header>
 
     <div class="tabs" id="modeTabs">
@@ -88,7 +88,9 @@
         </div>
         <div class="field">
           <label>연도</label>
-          <input id="fYear" type="text" placeholder="예) 2025 (비우면 전체)" />
+          <select id="fYearSel">
+            <option value="">전체</option>
+          </select>
         </div>
         <div class="field">
           <label>과목</label>
@@ -197,8 +199,44 @@
     return div;
   }
 
-  $('#btnSearch').addEventListener('click', async ()=>{
+  function normalizeRound(r){
+    if(!r) return 0; if(String(r).includes('2')) return 2; if(String(r).includes('1')) return 1; return 0;
+  }
+  let __manifestCache = [];
+  async function ensureManifest(){
+    if(__manifestCache.length===0){ __manifestCache = await fetchManifest(); }
+    return __manifestCache;
+  }
+  function populateYears(manifest){
     const type = $('#fType').value.trim();
+    const years = Array.from(new Set(manifest.filter(it=>!type || it.type===type).map(it=>Number(it.year)).filter(Boolean)));
+    years.sort((a,b)=>b-a);
+    const sel = $('#fYearSel');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">전체</option>' + years.map(y=>`<option value="${y}">${y}</option>`).join('');
+    if(years.includes(Number(cur))) sel.value = cur;
+  }
+  $('#fType').addEventListener('change', async ()=>{ const m = await ensureManifest(); populateYears(m); });
+
+  $('#btnSearch').addEventListener('click', async ()=>{
+    const manifest = await ensureManifest();
+    populateYears(manifest);
+    const type = $('#fType').value.trim();
+    const level = $('#fLevel').value.trim();
+    const year = $('#fYearSel').value.trim();
+    const subject = $('#fSubject').value.trim();
+    const results = manifest
+      .filter(it => (!type || it.type===type)
+                 && (!level || it.level===level)
+                 && (!year || String(it.year)===String(year))
+                 && (!subject || (it.subject||'').includes(subject)))
+      .sort((a,b)=> (Number(b.year)-Number(a.year)) || (normalizeRound(b.round)-normalizeRound(a.round)) );
+    const list = $('#resultList');
+    list.innerHTML='';
+    if(results.length===0){ list.innerHTML='<div class="muted">검색 결과가 없습니다. 필터를 조정해 보세요.</div>'; return; }
+    results.forEach(item=> list.appendChild(renderResultItem(item)) );
+  });
+  (async ()=>{ const m = await ensureManifest(); populateYears(m); })();
     const level = $('#fLevel').value.trim();
     const year = $('#fYear').value.trim();
     const subject = $('#fSubject').value.trim();
