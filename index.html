@@ -1,264 +1,406 @@
-<!doctype html>
-<html lang="ko"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>노원구 꿈드림 검정고시 문제 풀이</title>
-<style>
-:root{--bg:#0b0b0b;--panel:#121212;--fg:#f5f5f5;--muted:#a3a3a3;--border:#2a2a2a;--good:#22c55e;--bad:#ef4444}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,Apple SD Gothic Neo,Noto Sans KR,Arial}
-.wrap{max-width:960px;margin:0 auto;padding:16px}
-h1{margin:0 0 8px;font-size:22px}
-.tabs{display:flex;gap:8px;margin:8px 0 16px}
-.tabbtn{flex:1;border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--panel);color:var(--fg);font-weight:700;cursor:pointer}
-.tabbtn.active{outline:2px solid #333}
-.card{border:1px solid var(--border);border-radius:16px;padding:16px;background:var(--panel)}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-label{display:flex;flex-direction:column;font-size:12px;color:var(--muted)}
-select,.btn{border:1px solid var(--border);background:#0f0f0f;color:var(--fg);border-radius:10px;padding:10px 12px}
-.btn.primary{background:#1f1f1f;border-color:#444}
-.list a{display:block;padding:12px;border:1px solid var(--border);border-radius:12px;color:var(--fg);text-decoration:none;background:#0f0f0f}
-.list a+a{margin-top:8px}
-.choice{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--border);border-radius:12px;margin-top:8px;cursor:pointer;background:#0f0f0f}
-.choice.correct{border-color:var(--good)}.choice.wrong{border-color:var(--bad)}
-.section{margin-top:12px}.muted{color:var(--muted)}.hidden{display:none}
-.fig img{max-width:100%;border:1px solid var(--border);border-radius:8px;margin-top:8px;cursor:zoom-in}
-.topnav{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-.badge{display:inline-block;border:1px solid var(--border);padding:2px 8px;border-radius:999px;font-size:12px;color:var(--muted)}
-hr{border:0;border-top:1px solid var(--border);margin:16px 0}
-</style></head>
-<body><div class="wrap">
-  <h1>노원구 꿈드림 검정고시 문제 풀이</h1>
-  <div class="tabs">
-    <button id="tabOne" class="tabbtn active">한 문제씩 풀기</button>
-    <button id="tabExam" class="tabbtn">시험으로 풀기</button>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>노원구 꿈드림 | 검정고시 문제 풀이</title>
+  <style>
+    :root{
+      --bg:#0b0b0d; --panel:#121216; --muted:#1a1b22; --ink:#e8e8ef; --ink-dim:#b6b6c6; --accent:#9aa0ff;
+      --good:#4cc38a; --bad:#ef5f76; --border:#2a2b36; --yellow:#ffd666;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,sans-serif;}
+    a{color:var(--accent);text-decoration:none}
+    .app{max-width:960px;margin:0 auto;padding:24px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .brand{font-weight:800;letter-spacing:0.2px}
+    .brand small{display:block;color:var(--ink-dim);font-weight:600;opacity:.8}
+    .tabs{display:flex;gap:8px;background:var(--panel);padding:6px;border-radius:12px;border:1px solid var(--border)}
+    .tab{padding:10px 14px;border-radius:10px;cursor:pointer;color:var(--ink-dim)}
+    .tab.active{background:var(--muted);color:var(--ink);}
+
+    .filters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0}
+    .filters .field{display:flex;flex-direction:column;gap:6px}
+    select,button,input[type="text"]{background:var(--panel);color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:10px}
+    button{cursor:pointer}
+    button.primary{background:var(--accent);color:#0a0b11;border-color:transparent;font-weight:700}
+    button.ghost{background:transparent;border-color:var(--border);}
+
+    .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px}
+    .passage{background:#0f1016;border-left:3px solid var(--border);padding:12px;border-radius:8px}
+    .passage h4{margin:0 0 6px 0;color:var(--ink-dim);font-weight:700}
+    .passage pre{white-space:pre-wrap;font-family:inherit;line-height:1.6;margin:0}
+
+    .question{border:1px solid var(--border);border-radius:12px;padding:14px;background:#0f1014}
+    .q-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+    .q-num{font-weight:800;color:var(--yellow)}
+    .stem{line-height:1.65;margin:10px 0}
+    .choices{display:grid;gap:8px}
+    .choice{border:1px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;background:#10121a}
+    .choice.selected{outline:2px solid var(--accent);}
+    .choice.correct{border-color:rgba(76,195,138,.6);background:rgba(76,195,138,.08)}
+    .choice.incorrect{border-color:rgba(239,95,118,.6);background:rgba(239,95,118,.08)}
+
+    .explain{margin-top:8px;padding:10px;border:1px dashed var(--border);border-radius:10px;background:#0f1118;color:var(--ink-dim)}
+    .nav-row{display:flex;justify-content:space-between;gap:8px;margin-top:12px}
+
+    .summary{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+    .badge{padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#0f1118}
+    .badge.bad{border-color:rgba(239,95,118,.6);color:#ffc7d0;cursor:pointer}
+    .badge.good{border-color:rgba(76,195,138,.6);color:#b5ffdf}
+
+    .help{color:var(--ink-dim);font-size:.9rem}
+    .muted{color:var(--ink-dim)}
+
+    .hidden{display:none !important}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">노원구 꿈드림<small>검정고시 문제 풀이</small></div>
+      <div class="help">JSON 불러오기 버튼으로 바로 시험 세트를 로드할 수 있어요.</div>
+    </header>
+
+    <div class="tabs" id="modeTabs">
+      <div class="tab active" data-mode="practice">1문제씩 풀기</div>
+      <div class="tab" data-mode="exam">시험으로 풀기</div>
+    </div>
+
+    <section class="panel" id="home">
+      <div class="filters">
+        <div class="field">
+          <label>항목</label>
+          <select id="fType">
+            <option value="기출" selected>기출</option>
+            <option value="모의고사">모의고사</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>난이도</label>
+          <select id="fLevel">
+            <option value="고졸" selected>고졸</option>
+            <option value="중졸">중졸</option>
+            <option value="초졸">초졸</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>연도</label>
+          <input id="fYear" type="text" placeholder="예) 2025 (비우면 전체)" />
+        </div>
+        <div class="field">
+          <label>과목</label>
+          <input id="fSubject" type="text" placeholder="예) 국어 (비우면 전체)" />
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="primary" id="btnSearch">검색</button>
+        <button class="ghost" id="btnLoad">JSON 불러오기</button>
+        <input type="file" id="fileInput" accept="application/json" class="hidden" />
+        <span class="muted">또는 경로: <code>data/2025/2차/고졸/국어.json</code> 자동 로드</span>
+      </div>
+
+      <div id="resultList" style="margin-top:14px"></div>
+    </section>
+
+    <section class="panel hidden" id="runner">
+      <div id="runnerHeader" class="muted" style="margin-bottom:8px"></div>
+      <div id="quizArea"></div>
+      <div id="examFooter" class="hidden" style="margin-top:12px;display:flex;gap:8px">
+        <button id="btnGradeBottom" class="primary">채점하기</button>
+        <button id="btnBackHome2" class="ghost">홈으로</button>
+      </div>
+    </section>
   </div>
 
-  <section class="card" id="screenSelect">
-    <div class="row">
-      <label>항목<select id="selType"><option value="">전체</option><option>기출</option><option>모의고사</option></select></label>
-      <label>난이도<select id="selLevel"><option value="">전체</option><option>고졸</option><option>중졸</option><option>초졸</option></select></label>
-      <label>연도<select id="selYear"><option value="">전체</option><option>2025</option></select></label>
-      <label>과목<select id="selSubject"><option value="">전체</option><option>수학</option></select></label>
-      <button class="btn primary" id="btnSearch">검색</button>
-    </div>
-    <hr/>
-    <div class="muted" id="searchInfo">검색 전입니다.</div>
-    <div class="list" id="resultList"></div>
-  </section>
-
-  <section class="card hidden" id="screenOne">
-    <div class="topnav">
-      <div>
-        <strong id="metaOne"></strong>
-        <div class="muted" id="idxOne"></div>
-      </div>
-      <div class="row">
-        <span class="badge">한 문제씩</span>
-        <button class="btn" id="homeFromOne">홈으로</button>
-      </div>
-    </div>
-    <div id="stemOne" style="white-space:pre-wrap;margin-top:12px"></div>
-    <div id="figsOne" class="section fig"></div>
-    <div id="choicesOne"></div>
-    <div class="section">
-      <div class="row">
-        <button class="btn" id="prevOne">◀ 이전 문제</button>
-        <button class="btn" id="nextOne">다음 문제 ▶</button>
-      </div>
-    </div>
-    <div class="section muted" id="judgeOne"></div>
-    <div class="section" id="explainOne" style="white-space:pre-wrap"></div>
-  </section>
-
-  <section class="card hidden" id="screenExam">
-    <div class="topnav">
-      <div>
-        <strong id="metaExam"></strong>
-        <div class="muted" id="idxExam">전체 문항이 한 번에 표시됩니다.</div>
-      </div>
-      <div class="row">
-        <span class="badge">시험으로</span>
-        <button class="btn" id="homeFromExam">홈으로</button>
-        <button class="btn" id="gradeTop">채점하기</button>
-      </div>
-    </div>
-    <div id="examList" class="section"></div>
-    <div class="section" style="display:flex;justify-content:flex-end"><button class="btn" id="gradeBottom">채점하기</button></div>
-    <div class="section hidden" id="examResult"></div>
-  </section>
-</div>
-
 <script>
-let MODE='one';
-const tabOne=document.getElementById('tabOne'), tabExam=document.getElementById('tabExam');
-function setActive(el){[tabOne,tabExam].forEach(b=>b.classList.remove('active'));el.classList.add('active');}
-function goHome(){ screenSelect.classList.remove('hidden'); screenOne.classList.add('hidden'); screenExam.classList.add('hidden'); }
-tabOne.onclick=()=>{ MODE='one'; setActive(tabOne); goHome(); };
-tabExam.onclick=()=>{ MODE='exam'; setActive(tabExam); goHome(); };
+(function(){
+  const state = {
+    mode: 'practice', // 'practice' | 'exam'
+    data: null, // loaded JSON
+    answers: {}, // exam answers
+    current: 0, // index for practice
+    shownPassageId: null // to avoid repeating in exam blocks
+  };
 
-const screenSelect=document.getElementById('screenSelect'), screenOne=document.getElementById('screenOne'), screenExam=document.getElementById('screenExam');
-const btnSearch=document.getElementById('btnSearch'), resultList=document.getElementById('resultList'), searchInfo=document.getElementById('searchInfo');
-const selType=document.getElementById('selType'), selLevel=document.getElementById('selLevel'), selYear=document.getElementById('selYear'), selSubject=document.getElementById('selSubject');
-
-const metaOne=document.getElementById('metaOne'), idxOne=document.getElementById('idxOne'), stemOne=document.getElementById('stemOne'), figsOne=document.getElementById('figsOne'), choicesOne=document.getElementById('choicesOne');
-const prevOne=document.getElementById('prevOne'), nextOne=document.getElementById('nextOne'), judgeOne=document.getElementById('judgeOne'), explainOne=document.getElementById('explainOne');
-
-const metaExam=document.getElementById('metaExam'), examList=document.getElementById('examList'), examResult=document.getElementById('examResult');
-const gradeTop=document.getElementById('gradeTop'), gradeBottom=document.getElementById('gradeBottom');
-const homeFromOne=document.getElementById('homeFromOne'), homeFromExam=document.getElementById('homeFromExam');
-homeFromOne.onclick=goHome; homeFromExam.onclick=goHome;
-
-let MANIFEST=null, CURRENT=null, curIdx=0, userAnswers=[];
-
-fetch('manifest.json').then(r=>r.json()).then(m=>{ MANIFEST=m; });
-
-btnSearch.onclick=()=>{
-  if(!MANIFEST){ alert('로딩 중입니다.'); return; }
-  const type    = (selType.value||'').trim();
-  const level   = (selLevel.value||'').trim();
-  const year    = (selYear.value||'').trim();
-  const subject = (selSubject.value||'').trim();
-
-  const filtered = MANIFEST.sets.filter(s =>
-    (!type    || s.type    === type) &&
-    (!level   || s.level   === level) &&
-    (!year    || String(s.year) === String(year)) &&
-    (!subject || s.subject === subject)
-  );
-
-  searchInfo.textContent=`총 ${filtered.length}개 세트`;
-  resultList.innerHTML='';
-  if(!filtered.length){
-    const p=document.createElement('p'); p.className='muted'; p.textContent='조건에 맞는 세트가 없습니다.'; resultList.appendChild(p); return;
+  // --- helpers ---
+  const $ = sel => document.querySelector(sel);
+  function htmlEscape(s){ return s.replace(/[&<>]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch])) }
+  // prettify x^2 -> x<sup>2</sup>, a^10 etc
+  function prettifyMath(s){
+    return s
+      .replace(/\^\{?(\d+)\}?/g, '<sup>$1</sup>')
+      .replace(/([A-Za-z가-힣0-9])\^([A-Za-z가-힣0-9])/g, '$1<sup>$2</sup>');
   }
-  filtered.forEach(s=>{
-    const a=document.createElement('a'); a.href='#';
-    a.textContent=`[${s.type}] ${s.year} ${s.level} ${s.subject}${s.round?' '+s.round:''}`;
-    a.onclick=(e)=>{ e.preventDefault(); openSet(s); };
-    resultList.appendChild(a);
+  function renderRich(text){
+    if(!text) return '';
+    // allow simple inline HTML like <u> and <img>
+    let t = text
+      .replace(/\n/g,'\n')
+      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    t = prettifyMath(t);
+    return t;
+  }
+
+  function loadDefaultPath(){
+    // Try default path for demo
+    return fetch('data/2025/2차/고졸/국어.json').then(r=>r.ok?r.json():null).catch(()=>null);
+  }
+
+  function showHome(){
+    $('#home').classList.remove('hidden');
+    $('#runner').classList.add('hidden');
+    $('#examFooter').classList.add('hidden');
+    $('#resultList').innerHTML = '';
+  }
+
+  // --- tabs ---
+  Array.from(document.querySelectorAll('.tab')).forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      Array.from(document.querySelectorAll('.tab')).forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      state.mode = tab.dataset.mode;
+      // 탭을 누르면 홈으로 이동
+      showHome();
+    });
   });
-};
 
-function openSet(s){
-  fetch(s.path).then(r=>r.json()).then(js=>{
-    CURRENT=js;
-    if(MODE==='one'){ openOne(); } else { openExam(); }
+  // --- file load ---
+  $('#btnLoad').addEventListener('click',()=>$('#fileInput').click());
+  $('#fileInput').addEventListener('change', async (e)=>{
+    const f = e.target.files[0];
+    if(!f) return;
+    const txt = await f.text();
+    const json = JSON.parse(txt);
+    onDataLoaded(json, `파일: ${f.name}`);
   });
-}
 
-function renderFigures(container, q){
-  container.innerHTML='';
-  if(!q.figures) return;
-  q.figures.forEach(fig=>{
-    if(!fig.src) return;
-    const img=document.createElement('img');
-    img.src=fig.src; img.alt=fig.alt||fig.caption||'문항 그림'; img.style.maxWidth='100%';
-    img.onclick=()=>window.open(fig.src, '_blank');
-    container.appendChild(img);
-    if(fig.caption){ const cap=document.createElement('div'); cap.className='muted'; cap.textContent=fig.caption; container.appendChild(cap); }
+  // --- search (demo) ---
+  $('#btnSearch').addEventListener('click', async ()=>{
+    // 실제 배포에선 manifest를 조회해 필터링하면 됨.
+    // 데모: 기본 경로 시도 후 성공 시 결과에 보여 주기
+    const json = state.data || await loadDefaultPath();
+    if(!json){
+      $('#resultList').innerHTML = `<div class="muted">해당 조건의 로컬 데이터를 못 찾았습니다. JSON 불러오기를 이용하세요.</div>`;
+      return;
+    }
+    $('#resultList').innerHTML = '';
+    const item = document.createElement('div');
+    item.className = 'question';
+    item.innerHTML = `
+      <div class="q-head"><div>
+        <div class="muted">${htmlEscape(json.meta.source||'세트')}</div>
+        <div><strong>${htmlEscape(json.meta.year+'년 '+json.meta.round)} ${htmlEscape(json.meta.level)} ${htmlEscape(json.meta.subject)}</strong> · 문항 ${json.meta.count}</div>
+      </div>
+      <button class="primary" id="btnStart">시작</button></div>
+    `;
+    $('#resultList').appendChild(item);
+    $('#btnStart').addEventListener('click',()=>onDataLoaded(json, `${json.meta.year} ${json.meta.round} ${json.meta.subject}`));
   });
-}
 
-// 한 문제씩: 선택 즉시 정답/해설
-function openOne(){
-  screenSelect.classList.add('hidden'); screenExam.classList.add('hidden'); screenOne.classList.remove('hidden');
-  curIdx=0; userAnswers=new Array(CURRENT.questions.length).fill(null);
-  renderOne();
-}
-function renderOne(){
-  const q=CURRENT.questions[curIdx];
-  metaOne.textContent=`${CURRENT.meta.year} ${CURRENT.meta.level} ${CURRENT.meta.subject}`;
-  idxOne.textContent=`문항 ${q.number} / 총 ${CURRENT.questions.length}`;
-  stemOne.textContent=q.stem;
-  renderFigures(figsOne, q);
-  choicesOne.innerHTML=''; judgeOne.textContent=''; explainOne.textContent='';
-  q.choices.forEach((c,i)=>{
-    const div=document.createElement('div'); div.className='choice';
-    div.innerHTML=`<div class="btn" style="width:34px;text-align:center">${i+1}</div><div style="flex:1">${c}</div>`;
-    div.onclick=()=>{
-      userAnswers[curIdx]=i;
-      const ok=(i===q.answerIndex);
-      judgeOne.textContent= ok ? '정답입니다.' : `오답입니다. 정답은 ${q.answerIndex+1}번.`;
-      judgeOne.style.color= ok ? 'var(--good)' : 'var(--bad)';
-      explainOne.textContent = q.explanation || '';
-      [...choicesOne.children].forEach(el=>{ el.classList.remove('correct','wrong'); el.style.outline=''; });
-      div.classList.add(ok?'correct':'wrong');
-      div.style.outline='2px solid #333';
-    };
-    choicesOne.appendChild(div);
-  });
-  prevOne.disabled=(curIdx===0); nextOne.disabled=(curIdx===CURRENT.questions.length-1);
-}
-prevOne.onclick=()=>{ if(curIdx>0){ curIdx--; renderOne(); } };
-nextOne.onclick=()=>{ if(curIdx<CURRENT.questions.length-1){ curIdx++; renderOne(); } };
+  function onDataLoaded(json, title){
+    state.data = normalize(json);
+    state.current = 0;
+    state.answers = {};
+    $('#runnerHeader').textContent = title || (json?.meta?.source || '세트');
+    $('#home').classList.add('hidden');
+    $('#runner').classList.remove('hidden');
+    render();
+  }
 
-// 시험으로: 전 문항 표시, 채점 시 틀린 문항 해설 즉시
-function openExam(){
-  screenSelect.classList.add('hidden'); screenOne.classList.add('hidden'); screenExam.classList.remove('hidden');
-  userAnswers = new Array(CURRENT.questions.length).fill(null);
-  metaExam.textContent=`${CURRENT.meta.year} ${CURRENT.meta.level} ${CURRENT.meta.subject}`;
-  examList.innerHTML=''; examResult.classList.add('hidden'); examResult.innerHTML='';
+  // Normalize optional fields
+  function normalize(d){
+    d.passagesById = {};
+    (d.passages||[]).forEach(p=>d.passagesById[p.id]=p);
+    d.questions = (d.questions||[]).map(q=>({
+      number: q.number,
+      stem: q.stem || q.question || '',
+      choices: q.choices || q.options || [],
+      answerIndex: typeof q.answerIndex==='number' ? q.answerIndex : (typeof q.answer==='number'? q.answer : 0),
+      explanation: q.explanation||'',
+      passageId: q.passageId||null,
+      images: q.images||[]
+    }));
+    return d;
+  }
 
-  CURRENT.questions.forEach((q,qi)=>{
-    const wrap=document.createElement('div'); wrap.className='section'; wrap.id=`q${q.number}`;
-    wrap.innerHTML = `<div><strong>문항 ${q.number}</strong></div><div style="white-space:pre-wrap;margin-top:6px">${q.stem}</div><div class='section fig' id='figs_ex_${q.number}'></div>`;
-    // 래퍼 내부에서 그림 컨테이너 찾기 → DOM 타이밍 안전
-    const figc = wrap.querySelector('#figs_ex_'+q.number);
-    if(q.figures){
-      q.figures.forEach(fig=>{
-        if(!fig.src) return;
-        const img=document.createElement('img'); img.src=fig.src; img.style.maxWidth='100%'; img.onclick=()=>window.open(fig.src,'_blank');
-        figc.appendChild(img);
-        if(fig.caption){ const cap=document.createElement('div'); cap.className='muted'; cap.textContent=fig.caption; figc.appendChild(cap); }
+  // --- rendering ---
+  function render(){
+    const area = $('#quizArea');
+    area.innerHTML='';
+    if(state.mode==='practice'){
+      $('#examFooter').classList.add('hidden');
+      renderPractice(area);
+    }else{
+      renderExam(area);
+      $('#examFooter').classList.remove('hidden');
+    }
+  }
+
+  function renderPassageBlock(passage){
+    if(!passage) return '';
+    return `<div class="passage"><h4>${passage.title||'공통 지문'}</h4><pre>${renderRich(passage.text)}</pre></div>`;
+  }
+
+  function renderPractice(area){
+    const q = state.data.questions[state.current];
+    if(!q){ area.innerHTML = '<div class="muted">문항이 없습니다.</div>'; return; }
+
+    // passage
+    if(q.passageId){
+      const p = state.data.passagesById[q.passageId];
+      area.insertAdjacentHTML('beforeend', renderPassageBlock(p));
+    }
+
+    const card = document.createElement('div');
+    card.className = 'question';
+    card.innerHTML = `
+      <div class="q-head"><div class="q-num">문항 ${q.number}</div></div>
+      <div class="stem">${renderRich(q.stem)}</div>
+      <div class="choices"></div>
+      <div class="explain hidden"></div>
+      <div class="nav-row">
+        <button class="ghost" id="prevBtn">이전</button>
+        <div style="flex:1"></div>
+        <button class="ghost" id="nextBtn">다음</button>
+        <button class="primary" id="homeBtn">홈으로</button>
+      </div>
+    `;
+    area.appendChild(card);
+
+    const choicesEl = card.querySelector('.choices');
+    q.choices.forEach((c,i)=>{
+      const item = document.createElement('div');
+      item.className = 'choice';
+      item.innerHTML = renderRich(c);
+      item.addEventListener('click', ()=>{
+        // 즉시 정답/해설 노출
+        const correct = i===q.answerIndex;
+        Array.from(choicesEl.children).forEach(ch=>ch.classList.remove('selected','correct','incorrect'));
+        item.classList.add('selected', correct?'correct':'incorrect');
+        if(!correct){
+          // 정답 표시
+          choicesEl.children[q.answerIndex].classList.add('correct');
+        }
+        const ex = card.querySelector('.explain');
+        ex.classList.remove('hidden');
+        ex.innerHTML = `<div><strong>${correct? '정답!':'오답'}</strong> · 정답은 <strong>${q.answerIndex+1}</strong>번<br>${renderRich(q.explanation)}</div>`;
+      });
+      choicesEl.appendChild(item);
+    });
+
+    card.querySelector('#prevBtn').addEventListener('click',()=>{
+      state.current = Math.max(0, state.current-1); render();
+    });
+    card.querySelector('#nextBtn').addEventListener('click',()=>{
+      state.current = Math.min(state.data.questions.length-1, state.current+1); render();
+    });
+    card.querySelector('#homeBtn').addEventListener('click', showHome);
+  }
+
+  function renderExam(area){
+    const header = document.createElement('div');
+    header.className='nav-row';
+    header.innerHTML = `
+      <button class="ghost" id="backHome">홈으로</button>
+      <div style="flex:1"></div>
+      <button class="primary" id="btnGradeTop">채점하기</button>`;
+    area.appendChild(header);
+
+    state.shownPassageId = null;
+
+    state.data.questions.forEach((q,idx)=>{
+      // 지문: 같은 passageId가 연속되면 한 번만 출력
+      if(q.passageId && q.passageId !== state.shownPassageId){
+        const p = state.data.passagesById[q.passageId];
+        area.insertAdjacentHTML('beforeend', renderPassageBlock(p));
+        state.shownPassageId = q.passageId;
+      }
+
+      const card = document.createElement('div');
+      card.className = 'question';
+      card.dataset.index = idx;
+      card.innerHTML = `
+        <div class="q-head"><div class="q-num">문항 ${q.number}</div></div>
+        <div class="stem">${renderRich(q.stem)}</div>
+        <div class="choices"></div>
+        <div class="explain hidden"></div>
+      `;
+      area.appendChild(card);
+
+      const choicesEl = card.querySelector('.choices');
+      q.choices.forEach((c,i)=>{
+        const item = document.createElement('div');
+        item.className = 'choice';
+        item.innerHTML = renderRich(c);
+        item.addEventListener('click',()=>{
+          state.answers[idx] = i;
+          Array.from(choicesEl.children).forEach(ch=>ch.classList.remove('selected'));
+          item.classList.add('selected');
+        });
+        choicesEl.appendChild(item);
+      });
+    });
+
+    function grade(){
+      let correct = 0; const wrongList = [];
+      state.data.questions.forEach((q,idx)=>{
+        const card = area.querySelector(`.question[data-index="${idx}"]`);
+        const sel = state.answers[idx];
+        const chs = card.querySelectorAll('.choice');
+        chs.forEach(ch=>ch.classList.remove('correct','incorrect'));
+        if(sel===q.answerIndex){
+          correct++;
+          if(chs[sel]) chs[sel].classList.add('correct');
+        } else {
+          if(typeof sel==='number' && chs[sel]) chs[sel].classList.add('incorrect');
+          if(chs[q.answerIndex]) chs[q.answerIndex].classList.add('correct');
+          wrongList.push(q.number);
+          const ex = card.querySelector('.explain');
+          ex.classList.remove('hidden');
+          ex.innerHTML = `<div><strong>정답: ${q.answerIndex+1}</strong><br>${renderRich(q.explanation)}</div>`;
+        }
+      });
+
+      const sum = document.createElement('div');
+      sum.className='question';
+      sum.innerHTML = `<div class="q-head">
+        <div><strong>채점 결과</strong></div>
+        <div class="muted">점수: ${correct} / ${state.data.questions.length}</div>
+      </div>`;
+      const summary = document.createElement('div');
+      summary.className='summary';
+
+      if(wrongList.length===0){
+        summary.innerHTML = '<span class="badge good">전부 정답입니다! 훌륭해요 👏</span>';
+      } else {
+        summary.innerHTML = '<span class="muted">틀린 문항:</span>' + wrongList.map(n=>`<span class="badge bad" data-go="${n}">${n}번</span>`).join('');
+      }
+      sum.appendChild(summary);
+      area.prepend(sum);
+
+      // 클릭 시 스크롤 이동
+      sum.addEventListener('click', (e)=>{
+        const el = e.target.closest('.badge.bad');
+        if(!el) return;
+        const n = parseInt(el.dataset.go,10);
+        const idx = state.data.questions.findIndex(q=>q.number===n);
+        const card = area.querySelector(`.question[data-index="${idx}"]`);
+        if(card) card.scrollIntoView({behavior:'smooth', block:'start'});
       });
     }
-    const box=document.createElement('div'); box.style.marginTop='6px';
-    q.choices.forEach((c,i)=>{
-      const div=document.createElement('div'); div.className='choice';
-      div.innerHTML=`<div class="btn" style="width:34px;text-align:center">${i+1}</div><div style="flex:1">${c}</div>`;
-      div.onclick=()=>{ userAnswers[qi]=i; [...box.children].forEach(el=>el.style.outline=''); div.style.outline='2px solid #333'; };
-      box.appendChild(div);
-    });
-    const exp=document.createElement('div'); exp.className='explain muted hidden'; exp.id=`exp${q.number}`;
-    wrap.appendChild(box); wrap.appendChild(exp); examList.appendChild(wrap);
-  });
-}
 
-function gradeExam(){
-  let correct=0, wrongNums=[];
-  CURRENT.questions.forEach((q,i)=>{ if(userAnswers[i]===q.answerIndex) correct++; else wrongNums.push(q.number); });
-  const total=CURRENT.questions.length, score=Math.round((correct/total)*100);
-
-  examResult.classList.remove('hidden');
-  examResult.innerHTML=`<hr/><div><strong>점수: ${score}점</strong> (정답 ${correct}/${total})</div>`;
-
-  // 모든 문항: 정답/오답 하이라이트 + 틀린 문항 해설 즉시 노출
-  CURRENT.questions.forEach((q,i)=>{
-    const wrap=document.getElementById('q'+q.number);
-    if(!wrap) return;
-    const choices=wrap.querySelectorAll('.choice');
-    choices.forEach((el,idx)=>{
-      el.classList.remove('correct','wrong'); el.style.outline='';
-      if(idx===q.answerIndex) el.classList.add('correct');                 // 정답 → 초록 테두리
-      if(userAnswers[i]===idx && idx!==q.answerIndex){                     // 내가 고른 오답 → 빨강 테두리
-        el.classList.add('wrong'); el.style.outline='2px solid var(--bad)';
-      }
-    });
-    const exp=document.getElementById('exp'+q.number);
-    if(exp){
-      const isWrong = userAnswers[i] !== q.answerIndex;
-      if(isWrong){ exp.classList.remove('hidden'); exp.textContent=`정답: ${q.answerIndex+1}번\n해설: ${q.explanation||''}`; }
-      else { exp.classList.add('hidden'); exp.textContent = q.explanation ? `해설: ${q.explanation}` : ''; }
-    }
-  });
-
-  // 틀린 번호 점프 버튼
-  if(wrongNums.length){
-    const div=document.createElement('div'); div.style.marginTop='8px'; div.innerHTML='틀린 문항: ';
-    wrongNums.forEach(n=>{ const btn=document.createElement('button'); btn.className='btn'; btn.textContent=String(n); btn.onclick=()=>{ document.getElementById('q'+n).scrollIntoView({behavior:'smooth',block:'start'}); }; div.appendChild(btn); });
-    examResult.appendChild(div);
-  }else{
-    examResult.innerHTML += `<div class="muted">틀린 문제가 없습니다. 훌륭해요!</div>`;
+    $('#btnGradeTop').addEventListener('click', grade);
+    $('#btnGradeBottom').addEventListener('click', grade);
+    $('#backHome').addEventListener('click', showHome);
+    $('#btnBackHome2').addEventListener('click', showHome);
   }
-}
 
-gradeTop.onclick=gradeExam; gradeBottom.onclick=gradeExam;
-</script></body></html>
+  // boot: try load default set so 검색 없이도 테스트 가능
+  loadDefaultPath().then(json=>{ if(json){ onDataLoaded(json, `${json.meta.year} ${json.meta.round} ${json.meta.subject}`); showHome(); }});
+})();
+</script>
+</body>
+</html>
