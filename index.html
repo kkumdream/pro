@@ -61,7 +61,7 @@
   <div class="app">
     <header>
       <div class="brand">노원구 꿈드림<small>검정고시 문제 풀이</small></div>
-      <div class="help">JSON 불러오기 버튼으로 바로 시험 세트를 로드할 수 있어요.</div>
+      <div class="help">필터로 검색해 원하는 회차·과목을 선택해 시작하세요.</div>
     </header>
 
     <div class="tabs" id="modeTabs">
@@ -97,9 +97,7 @@
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <button class="primary" id="btnSearch">검색</button>
-        <button class="ghost" id="btnLoad">JSON 불러오기</button>
-        <input type="file" id="fileInput" accept="application/json" class="hidden" />
-        <span class="muted">또는 경로: <code>data/2025/2차/고졸/국어.json</code> 자동 로드</span>
+        <span class="muted">manifest.json을 기준으로 검색합니다.</span>
       </div>
 
       <div id="resultList" style="margin-top:14px"></div>
@@ -167,21 +165,60 @@
     });
   });
 
-  // --- file load ---
-  $('#btnLoad').addEventListener('click',()=>$('#fileInput').click());
-  $('#fileInput').addEventListener('change', async (e)=>{
-    const f = e.target.files[0];
-    if(!f) return;
-    const txt = await f.text();
-    const json = JSON.parse(txt);
-    onDataLoaded(json, `파일: ${f.name}`);
-  });
+  // --- manifest search ---
+  async function fetchManifest(){
+    try {
+      const r = await fetch('manifest.json');
+      if(!r.ok) return [];
+      const json = await r.json();
+      return Array.isArray(json) ? json : (json.items||[]);
+    } catch(e){ return []; }
+  }
 
-  // --- search (demo) ---
+  function renderResultItem(item){
+    const div = document.createElement('div');
+    div.className = 'question';
+    div.innerHTML = `
+      <div class="q-head"><div>
+        <div class="muted">${htmlEscape(item.type||'세트')}</div>
+        <div><strong>${htmlEscape(item.year+'년 '+item.round)} ${htmlEscape(item.level)} ${htmlEscape(item.subject)}</strong></div>
+      </div>
+      <button class="primary">시작</button></div>`;
+    div.querySelector('button').addEventListener('click', async ()=>{
+      try{
+        const res = await fetch(item.path);
+        if(!res.ok) throw new Error('로드 실패');
+        const json = await res.json();
+        onDataLoaded(json, `${item.year} ${item.round} ${item.subject}`);
+      }catch(err){
+        alert('세트 로드에 실패했습니다. 경로: '+item.path);
+      }
+    });
+    return div;
+  }
+
   $('#btnSearch').addEventListener('click', async ()=>{
-    // 실제 배포에선 manifest를 조회해 필터링하면 됨.
-    // 데모: 기본 경로 시도 후 성공 시 결과에 보여 주기
-    const json = state.data || await loadDefaultPath();
+    const type = $('#fType').value.trim();
+    const level = $('#fLevel').value.trim();
+    const year = $('#fYear').value.trim();
+    const subject = $('#fSubject').value.trim();
+
+    const manifest = await fetchManifest();
+    const results = manifest.filter(it=>
+      (!type || it.type===type) &&
+      (!level || it.level===level) &&
+      (!year || String(it.year)===String(year)) &&
+      (!subject || (it.subject||'').includes(subject))
+    );
+
+    const list = $('#resultList');
+    list.innerHTML = '';
+    if(results.length===0){
+      list.innerHTML = '<div class="muted">검색 결과가 없습니다. 필터를 조정해 보세요.</div>';
+      return;
+    }
+    results.forEach(item=> list.appendChild(renderResultItem(item)) );
+  });
     if(!json){
       $('#resultList').innerHTML = `<div class="muted">해당 조건의 로컬 데이터를 못 찾았습니다. JSON 불러오기를 이용하세요.</div>`;
       return;
